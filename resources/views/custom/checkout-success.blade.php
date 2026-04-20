@@ -2,20 +2,10 @@
 
 @section('content')
 
-{{-- Breadcrumb --}}
-<div class="site-breadcrumb" style="background: url({{ asset('assets/img/breadcrumb/breadcrumb.jpg') }})">
-    <div class="container">
-        <h2 class="breadcrumb-title">Order Confirmed</h2>
-        <ul class="breadcrumb-menu">
-            <li><a href="{{ url('/') }}">Home</a></li>
-            <li class="active">Order Confirmed</li>
-        </ul>
-    </div>
-</div>
 
 {{-- Success Section --}}
-<div class="shop-checkout py-120">
-    <div class="container">
+<div class="shop-checkout py-80">
+    <div class="container pb-90">
         <div class="row justify-content-center">
             <div class="col-lg-7 text-center">
 

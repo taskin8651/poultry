@@ -2,6 +2,7 @@
 use App\Http\Controllers\Custom\ShopController;
 use App\Http\Controllers\Custom\CartController;
 use App\Http\Controllers\Custom\CheckoutController;
+use App\Http\Controllers\Custom\OrderController;
 
 
 Route::redirect('/', '/login');
@@ -76,3 +77,10 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 
+// User Dashboard
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/my-orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+
+});
