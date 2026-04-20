@@ -6,7 +6,7 @@
             <div class="container">
                 <h2 class="breadcrumb-title">Our Shop</h2>
                 <ul class="breadcrumb-menu">
-                    <li><a href="index.html">Home</a></li>
+                    <li><a href="/">Home</a></li>
                     <li class="active">Our Shop</li>
                 </ul>
             </div>

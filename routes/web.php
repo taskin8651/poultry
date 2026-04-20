@@ -68,11 +68,11 @@ Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/shop/{slug}', [ShopController::class, 'show'])->name('shop.show');
 
 Route::post('/add-to-cart', [CartController::class, 'add'])->name('cart.add');
-
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-
+Route::get('/cart',         [CartController::class, 'index'])->name('cart.index');
 Route::post('/remove-cart', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/update-cart', [CartController::class, 'update'])->name('cart.update');
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 

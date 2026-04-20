@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Custom;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use 
+use  App\Models\Category;
 
 class ShopController extends Controller
 {
@@ -60,7 +60,7 @@ class ShopController extends Controller
         $products = $query->with('media')->paginate(9)->withQueryString();
 
         // 📂 Categories for sidebar
-        $categories = Category::where('status', 1)->get();
+        $categories = Category::all();
 
         return view('custom.shop', compact('products', 'categories'));
     }

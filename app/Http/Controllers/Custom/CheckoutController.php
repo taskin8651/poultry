@@ -3,81 +3,107 @@
 namespace App\Http\Controllers\Custom;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
-    public function index()
-{
-    $cart = session('cart', []);
-
-    if(empty($cart)){
-        return redirect()->route('cart.index');
+    public function __construct()
+    {
+        $this->middleware('auth'); // must be logged in
     }
 
-    $user = auth()->user();
-
-    return view('custom.checkout', compact('cart', 'user'));
-}
-
-    public function store(Request $request)
+    // -------------------------------------------------------------------------
+    // GET /checkout
+    // -------------------------------------------------------------------------
+    public function index()
     {
-        $request->validate([
-            'name'    => 'required|string|max:100',
-            'phone'   => 'required|string|max:20',
-            'address' => 'required|string',
-            'note'    => 'nullable|string'
-        ]);
-
         $cart = session('cart', []);
-        if (!$cart || count($cart) === 0) {
-            return redirect()->route('cart.index')->with('error', 'Cart is empty');
+
+        if (empty($cart)) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
+        $user    = Auth::user();
+        $summary = $this->calcSummary($cart);
+
+        return view('custom.checkout', compact('cart', 'user', 'summary'));
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /checkout
+    // -------------------------------------------------------------------------
+    public function store(Request $request)
+    {
+        $cart = session('cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        $request->validate([
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        $user    = Auth::user();
+        $summary = $this->calcSummary($cart);
+
         DB::beginTransaction();
-
         try {
-
-            $totalQty = 0;
-            $totalAmount = 0;
-
-            foreach ($cart as $item) {
-                $totalQty += $item['qty'];
-                $totalAmount += ($item['price'] * $item['qty']);
-            }
-
-            // 🔥 Create Order
+            // Create order
             $order = Order::create([
-                'user_id' => auth()->id() ?? null,
-                'total_qty' => $totalQty,
-                'total_amount' => $totalAmount,
-                'status' => 'pending',
-                'note' => $request->note,
+                'user_id'      => $user->id,
+                'total_qty'    => collect($cart)->sum('quantity'),
+                'total_amount' => $summary['total'],
+                'status'       => 'pending',
+                'note'         => $request->note,
             ]);
 
-            // 🔥 Save Items
-            foreach ($cart as $productId => $item) {
+            // Create order items
+            foreach ($cart as $item) {
                 OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $productId,
-                    'qty' => $item['qty'],
-                    'price' => $item['price'],
+                    'order_id'   => $order->id,
+                    'product_id' => $item['product_id'],
+                    'qty'        => $item['quantity'],
+                    'price'      => $item['unit_price'],  // bulk-resolved price
                 ]);
             }
 
             DB::commit();
 
-            // 🔥 Clear cart
+            // Clear cart after successful order
             session()->forget('cart');
 
-            return redirect()->route('cart.index')->with('success', 'Order placed successfully');
+            return redirect()->route('checkout.success', $order->id)
+                             ->with('success', 'Order placed successfully!');
 
         } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', 'Something went wrong');
+            DB::rollBack();
+            return back()->with('error', 'Something went wrong. Please try again.');
         }
     }
+
+    // -------------------------------------------------------------------------
+    // HELPER
+    // -------------------------------------------------------------------------
+    private function calcSummary(array $cart): array
+    {
+        $subTotal = round(collect($cart)->sum('subtotal'), 2);
+
+        return [
+            'sub_total'  => $subTotal,
+            'total_qty'  => collect($cart)->sum('quantity'),
+            'total'      => $subTotal,
+        ];
+    }
+
+
+    public function success(Order $order)
+{
+    abort_if($order->user_id !== Auth::id(), 403);
+    return view('custom.checkout-success', compact('order'));
+}
 }

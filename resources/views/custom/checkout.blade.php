@@ -1,251 +1,230 @@
 @extends('custom.master')
+
 @section('content')
 
-<!--==================================================-->
-<!-- Start buddy Breadcumb Area -->
-<!--==================================================-->
-<div class="breadcumb-area d-flex align-items-center">
-	<div class="container">
-		<div class="row d-flex align-items-center">
-			<div class="col-lg-12">
-				<div class="breadcumb-content text-center">
-					<div class="breadcumb-title">
-						<h4>Checkout</h4>
-					</div>
-					<ul>
-						<li><a href="/"><i class="bi bi-house-door-fill"></i> Home </a></li>
-						<li class="rotates"><i class="bi bi-slash-lg"></i>Checkout</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
+{{-- Breadcrumb --}}
+<div class="site-breadcrumb" style="background: url({{ asset('assets/img/breadcrumb/breadcrumb.jpg') }})">
+    <div class="container">
+        <h2 class="breadcrumb-title">Shop Checkout</h2>
+        <ul class="breadcrumb-menu">
+            <li><a href="{{ url('/') }}">Home</a></li>
+            <li class="active">Shop Checkout</li>
+        </ul>
+    </div>
 </div>
-<!--==================================================-->
-<!-- End buddy Breadcumb Area -->
-<!--==================================================-->
 
-<section class="contact_area inner_section pt-80 pb-80">
-<div class="container">
+{{-- Alerts --}}
+@if(session('error'))
+    <div class="container mt-3">
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    </div>
+@endif
 
-@php
-    $total = 0;
-@endphp
+{{-- Checkout --}}
+<div class="shop-checkout py-120">
+    <div class="container">
+        <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
+            @csrf
+            <div class="row">
 
-<div class="row">
+                {{-- LEFT: Billing + Shipping --}}
+                <div class="col-lg-8">
 
-
-    <!-- RIGHT: ORDER SUMMARY -->
-    <div class="col-lg-6">
-
-    <div class="shadow-sm border rounded p-4 bg-white">
-
-        <h5 class="fw-bold mb-4">Order Summary</h5>
-
-        @php $total = 0; @endphp
-
-        @foreach($cart as $item)
-
-            @php
-                $itemTotal = $item['price'] * $item['qty'];
-                $total += $itemTotal;
-
-                $unit = match($item['sale_type'] ?? '') {
-                    'tray' => 'Tray',
-                    'piece' => 'Piece',
-                    'weight' => 'Kg',
-                    default => 'Unit'
-                };
-            @endphp
-
-            <!-- PRODUCT ROW -->
-            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-
-                <!-- IMAGE -->
-                <div style="width:60px;">
-                    <img src="{{ $item['image'] ?: asset('assets/images/default.png') }}"
-                         class="img-fluid rounded">
-                </div>
-
-                <!-- DETAILS -->
-                <div class="flex-grow-1 ms-3">
-
-                    <div class="fw-semibold">
-                        {{ $item['name'] }}
+                    {{-- Billing Address (auto-filled from user) --}}
+                    <div class="checkout-widget">
+                        <h4 class="checkout-widget-title">Billing Address</h4>
+                        <div class="checkout-form">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>First Name</label>
+                                        <input type="text" class="form-control"
+                                               value="{{ $user->first_name ?? explode(' ', $user->name)[0] }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Last Name</label>
+                                        <input type="text" class="form-control"
+                                               value="{{ $user->last_name ?? (explode(' ', $user->name)[1] ?? '') }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control"
+                                               value="{{ $user->email }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Phone</label>
+                                        <input type="text" class="form-control"
+                                               value="{{ $user->phone ?? '' }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Address</label>
+                                        <input type="text" class="form-control"
+                                               value="{{ $user->address ?? '' }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <small class="text-muted">
-                        ₹{{ number_format($item['price'],2) }} / {{ $unit }}
-                    </small>
+                    {{-- Shipping Address --}}
+                    <div class="checkout-widget">
+                        <h4 class="checkout-widget-title">Shipping Address</h4>
 
-                    <br>
+                        {{-- Same as billing toggle --}}
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="same-as-billing" checked>
+                            <label class="form-check-label" for="same-as-billing">
+                                Same as billing address
+                            </label>
+                        </div>
 
-                    <small>
-                        Qty: {{ $item['qty'] }} {{ $unit }}
-                    </small>
+                        <div class="checkout-form" id="shipping-fields">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>First Name</label>
+                                        <input type="text" name="shipping_first_name" class="form-control"
+                                               placeholder="First Name"
+                                               value="{{ $user->first_name ?? explode(' ', $user->name)[0] }}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Last Name</label>
+                                        <input type="text" name="shipping_last_name" class="form-control"
+                                               placeholder="Last Name"
+                                               value="{{ $user->last_name ?? (explode(' ', $user->name)[1] ?? '') }}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Phone</label>
+                                        <input type="text" name="shipping_phone" class="form-control"
+                                               placeholder="Phone"
+                                               value="{{ $user->phone ?? '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Address Line 1</label>
+                                        <input type="text" name="shipping_address1" class="form-control"
+                                               placeholder="Address Line 1"
+                                               value="{{ $user->address ?? '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Address Line 2 <span class="text-muted">(optional)</span></label>
+                                        <input type="text" name="shipping_address2" class="form-control"
+                                               placeholder="Address Line 2">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Additional Info <span class="text-muted">(optional)</span></label>
+                                        <textarea class="form-control" name="note" cols="30" rows="4"
+                                                  placeholder="Any delivery instructions or notes..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 
-                <!-- PRICE -->
-                <div class="fw-bold text-end">
-                    ₹{{ number_format($itemTotal,2) }}
+                {{-- RIGHT: Order Summary --}}
+                <div class="col-lg-4">
+                    <div class="checkout cart-summary">
+                        <h4 class="mb-30">Order Summary</h4>
+
+                        {{-- Cart items list --}}
+                        <div class="checkout-items mb-3">
+                            @foreach($cart as $item)
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>{{ $item['name'] }}</strong><br>
+                                    <small class="text-muted">
+                                        {{ $item['quantity'] }} × ₹{{ number_format($item['unit_price'], 2) }}
+                                        @if($item['unit_price'] < $item['base_price'])
+                                            <span class="badge bg-success ms-1" style="font-size:10px;">Bulk</span>
+                                        @endif
+                                    </small>
+                                </div>
+                                <span>₹ {{ number_format($item['subtotal'], 2) }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        <hr>
+
+                        <ul>
+                            <li>
+                                <strong>Total Items:</strong>
+                                <span>{{ $summary['total_qty'] }}</span>
+                            </li>
+                            <li>
+                                <strong>Sub Total:</strong>
+                                <span>₹ {{ number_format($summary['sub_total'], 2) }}</span>
+                            </li>
+                            <li class="cart-total">
+                                <strong>Total Pay:</strong>
+                                <span>₹ {{ number_format($summary['total'], 2) }}</span>
+                            </li>
+                        </ul>
+
+                        <div class="text-end mt-40">
+                            <button type="submit" class="theme-btn" id="place-order-btn">
+                                Place Order <i class="far fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
-
-        @endforeach
-
-        <!-- SUMMARY -->
-        <div class="mt-3">
-
-            <div class="d-flex justify-content-between mb-2">
-                <span>Subtotal</span>
-                <span>₹{{ number_format($total,2) }}</span>
-            </div>
-
-            <div class="d-flex justify-content-between mb-2">
-                <span>Delivery</span>
-                <span class="text-success">Free</span>
-            </div>
-
-
-            <div class="d-flex justify-content-between">
-                <strong>Total</strong>
-                <strong class="text-primary fs-5">
-                    ₹{{ number_format($total,2) }}
-                </strong>
-            </div>
-
-        </div>
-
+        </form>
     </div>
-
 </div>
-
-    <!-- LEFT: FORM -->
-    <div class="col-lg-6">
-
-       
-
-         <form method="POST" action="{{ route('checkout.store') }}" class="buddy-checkout-form">
-@csrf
-
-<h4 class="checkout-title mb-4">Billing Details</h4>
-
-<div class="row">
-
-    <!-- Name -->
-    <div class="col-lg-6 mb-3">
-        <div class="form-box">
-            <input type="text" name="name"
-                   value="{{ old('name', $user->name ?? '') }}"
-                   placeholder="Full Name *" required>
-        </div>
-    </div>
-
-    <!-- Phone -->
-    <div class="col-lg-6 mb-3">
-        <div class="form-box">
-            <input type="text" name="phone"
-                   value="{{ old('phone', $user->phone ?? '') }}"
-                   placeholder="Phone Number *" required>
-        </div>
-    </div>
-
-    <!-- Address -->
-    <div class="col-lg-12 mb-3">
-        <div class="form-box message">
-            <textarea name="address" rows="3"
-                      placeholder="Full Address *" required>{{ old('address', $user->address ?? '') }}</textarea>
-        </div>
-    </div>
-
-    <!-- Note -->
-    <div class="col-lg-12 mb-3">
-        <div class="form-box message">
-            <textarea name="note" rows="2"
-                      placeholder="Order Note (Optional)">{{ old('note') }}</textarea>
-        </div>
-    </div>
-
-</div>
-
-<!-- BUTTON -->
-<div class="checkout-btn-wrap">
-    <button type="submit" class="buddy-checkout-btn">
-        Place Order <i class="bi bi-arrow-right"></i>
-    </button>
-</div>
-
-</form>
-
-<style>
-
-.buddy-checkout-form{
-    background:#fff;
-    padding:35px;
-    border-radius:10px;
-    box-shadow:0 5px 25px rgba(0,0,0,0.05);
-}
-
-/* Title */
-.checkout-title{
-    font-size:22px;
-    font-weight:700;
-    color:#1c1c1c;
-}
-
-/* Inputs */
-.buddy-checkout-form .form-box input,
-.buddy-checkout-form .form-box textarea{
-    width:100%;
-    border:1px solid #e5e5e5;
-    padding:12px 15px;
-    border-radius:6px;
-    font-size:14px;
-    transition:0.3s;
-}
-
-.buddy-checkout-form .form-box input:focus,
-.buddy-checkout-form .form-box textarea:focus{
-    border-color:#28a745;
-    box-shadow:0 0 0 2px rgba(40,167,69,0.1);
-    outline:none;
-}
-
-/* Button */
-.buddy-checkout-btn{
-    width:100%;
-    background: linear-gradient(135deg,#28a745,#20c997);
-    color:#fff;
-    border:none;
-    padding:14px;
-    font-size:16px;
-    font-weight:600;
-    border-radius:6px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-    transition:0.3s;
-}
-
-.buddy-checkout-btn:hover{
-    background: linear-gradient(135deg,#218838,#17a589);
-    transform: translateY(-2px);
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);
-}
-
-</style>
-
-        </div>
-
-    </div>
-
-
-</div>
-
-</div>
-</section>
 
 @endsection
+
+@push('scripts')
+<script>
+    // Same as billing toggle — disable/enable shipping fields
+    const sameAsBilling   = document.getElementById('same-as-billing');
+    const shippingFields  = document.getElementById('shipping-fields');
+
+    function toggleShipping() {
+        const inputs = shippingFields.querySelectorAll('input, textarea');
+        inputs.forEach(el => {
+            if (sameAsBilling.checked) {
+                el.closest('.form-group').style.opacity = '0.5';
+            } else {
+                el.closest('.form-group').style.opacity = '1';
+            }
+        });
+    }
+
+    sameAsBilling.addEventListener('change', toggleShipping);
+    toggleShipping(); // init
+
+    // Prevent double submit
+    document.getElementById('checkout-form').addEventListener('submit', function () {
+        const btn = document.getElementById('place-order-btn');
+        btn.disabled   = true;
+        btn.innerHTML  = '<span class="far fa-spinner fa-spin"></span> Placing Order...';
+    });
+</script>
+@endpush
