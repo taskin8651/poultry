@@ -7,6 +7,7 @@ use App\Http\Controllers\Custom\AboutController;
 use App\Http\Controllers\Custom\ServiceController;
 use App\Http\Controllers\Custom\OfferController;
 use App\Http\Controllers\Custom\ContactController;
+use App\Http\Controllers\Custom\HomeController;
 
 
 Route::redirect('/', '/login');
@@ -67,7 +68,7 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
 });
 
 // Frontend routes
-Route::view('/','custom.home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/shop/{slug}', [ShopController::class, 'show'])->name('shop.show');
