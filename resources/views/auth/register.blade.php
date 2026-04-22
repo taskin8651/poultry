@@ -1,112 +1,102 @@
-@extends('layouts.app')
+@extends('custom.master')
+
 @section('content')
 
-<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
 
-    <div class="w-full max-w-md bg-white border border-gray-200 rounded-lg shadow-sm">
+<!-- register area -->
+<div class="login-area py-120">
+    <div class="container">
+        <div class="col-md-5 mx-auto">
+            <div class="login-form">
 
-        {{-- HEADER --}}
-        <div class="px-8 pt-8 pb-4 text-center">
-            <h1 class="text-2xl font-semibold text-gray-900">
-                {{ trans('panel.site_title') }}
-            </h1>
-            <p class="text-sm text-gray-500 mt-1">
-                {{ trans('global.register') }}
-            </p>
+                {{-- Header --}}
+                <div class="login-header text-center mb-4">
+                    <img src="{{ asset('assets/img/logo/logo.png') }}" alt="logo" width="120">
+                    <p>Create your account</p>
+                </div>
+
+                {{-- Errors --}}
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        @foreach($errors->all() as $error)
+                            <p class="mb-0">{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- FORM --}}
+                <form method="POST" action="{{ route('register') }}">
+                    @csrf
+
+                    {{-- Name --}}
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text"
+                               name="name"
+                               value="{{ old('name') }}"
+                               class="form-control"
+                               placeholder="Enter your name"
+                               required>
+                    </div>
+
+                    {{-- Email --}}
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email"
+                               name="email"
+                               value="{{ old('email') }}"
+                               class="form-control"
+                               placeholder="Enter your email"
+                               required>
+                    </div>
+
+                    {{-- Password --}}
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Enter password"
+                               required>
+                    </div>
+
+                    {{-- Confirm Password --}}
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password"
+                               name="password_confirmation"
+                               class="form-control"
+                               placeholder="Confirm password"
+                               required>
+                    </div>
+
+                    {{-- Terms --}}
+                    <div class="form-check form-group">
+                        <input class="form-check-input" type="checkbox" required id="agree">
+                        <label class="form-check-label" for="agree">
+                            I agree with the <a href="#">Terms Of Service</a>
+                        </label>
+                    </div>
+
+                    {{-- Button --}}
+                    <div class="d-flex align-items-center">
+                        <button type="submit" class="theme-btn w-100">
+                            <i class="far fa-paper-plane"></i> Register
+                        </button>
+                    </div>
+
+                </form>
+
+                {{-- Footer --}}
+                <div class="login-footer text-center mt-4">
+                    <p>
+                        Already have an account?
+                        <a href="{{ route('login') }}">Login</a>
+                    </p>
+                </div>
+
+            </div>
         </div>
-
-        {{-- FORM --}}
-        <form method="POST" action="{{ route('register') }}" class="px-8 pb-8 space-y-5">
-            @csrf
-
-            {{-- NAME --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ trans('global.user_name') }}
-                </label>
-                <input type="text"
-                       name="name"
-                       value="{{ old('name') }}"
-                       required
-                       autofocus
-                       class="w-full px-3 py-2 border rounded-md text-sm
-                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              {{ $errors->has('name') ? 'border-red-500' : 'border-gray-300' }}">
-                @if($errors->has('name'))
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $errors->first('name') }}
-                    </p>
-                @endif
-            </div>
-
-            {{-- EMAIL --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ trans('global.login_email') }}
-                </label>
-                <input type="email"
-                       name="email"
-                       value="{{ old('email') }}"
-                       required
-                       class="w-full px-3 py-2 border rounded-md text-sm
-                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }}">
-                @if($errors->has('email'))
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $errors->first('email') }}
-                    </p>
-                @endif
-            </div>
-
-            {{-- PASSWORD --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ trans('global.login_password') }}
-                </label>
-                <input type="password"
-                       name="password"
-                       required
-                       class="w-full px-3 py-2 border rounded-md text-sm
-                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              {{ $errors->has('password') ? 'border-red-500' : 'border-gray-300' }}">
-                @if($errors->has('password'))
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $errors->first('password') }}
-                    </p>
-                @endif
-            </div>
-
-            {{-- CONFIRM PASSWORD --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ trans('global.login_password_confirmation') }}
-                </label>
-                <input type="password"
-                       name="password_confirmation"
-                       required
-                       class="w-full px-3 py-2 border rounded-md text-sm
-                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              border-gray-300">
-            </div>
-
-            {{-- ACTION --}}
-            <div class="pt-2">
-                <button type="submit"
-                        class="w-full py-2.5 bg-blue-600 text-white text-sm font-medium
-                               rounded-md hover:bg-blue-700 transition">
-                    {{ trans('global.register') }}
-                </button>
-            </div>
-
-            {{-- LOGIN LINK --}}
-            <div class="text-center pt-2">
-                <a href="{{ route('login') }}"
-                   class="text-sm text-blue-600 hover:underline">
-                    Already have an account? Login
-                </a>
-            </div>
-
-        </form>
     </div>
 </div>
 

@@ -1,105 +1,98 @@
-@extends('layouts.app')
+@extends('custom.master')
+
 @section('content')
 
-<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
 
-    <div class="w-full max-w-md bg-white border border-gray-200 rounded-lg shadow-sm">
+<!-- login area -->
+<div class="login-area py-120">
+    <div class="container">
+        <div class="col-md-5 mx-auto">
+            <div class="login-form">
 
-        {{-- HEADER --}}
-        <div class="px-8 pt-8 pb-4 text-center">
-            <h1 class="text-2xl font-semibold text-gray-900">
-                {{ trans('panel.site_title') }}
-            </h1>
-            <p class="text-sm text-gray-500 mt-1">
-                {{ trans('global.login') }}
-            </p>
+                {{-- Header --}}
+                <div class="login-header text-center mb-4">
+                    <img src="{{ asset('assets/img/logo/logo.png') }}" alt="logo" width="120">
+                    <p>Login with your account</p>
+                </div>
+
+                {{-- Success / Error --}}
+                @if(session('message'))
+                    <div class="alert alert-info">{{ session('message') }}</div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        @foreach($errors->all() as $error)
+                            <p class="mb-0">{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- FORM --}}
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+
+                    {{-- Email --}}
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email"
+                               name="email"
+                               value="{{ old('email') }}"
+                               class="form-control"
+                               placeholder="Enter your email"
+                               required>
+                    </div>
+
+                    {{-- Password --}}
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Enter your password"
+                               required>
+                    </div>
+
+                    {{-- Remember + Forgot --}}
+                    <div class="d-flex justify-content-between mb-4">
+
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="remember"
+                                   id="remember">
+                            <label class="form-check-label" for="remember">
+                                Remember Me
+                            </label>
+                        </div>
+
+                        @if(Route::has('password.request'))
+                            <a href="{{ route('password.request') }}" class="forgot-pass">
+                                Forgot Password?
+                            </a>
+                        @endif
+
+                    </div>
+
+                    {{-- Button --}}
+                    <div class="d-flex align-items-center">
+                        <button type="submit" class="theme-btn w-100">
+                            <i class="far fa-sign-in"></i> Login
+                        </button>
+                    </div>
+
+                </form>
+
+                {{-- Footer --}}
+                <div class="login-footer text-center mt-4">
+                    <p>
+                        Don't have an account?
+                        <a href="{{ route('register') }}">Register</a>
+                    </p>
+                </div>
+
+            </div>
         </div>
-
-        {{-- INFO MESSAGE --}}
-        @if(session('message'))
-            <div class="mx-8 mb-4 px-4 py-2 text-sm rounded-md
-                        bg-blue-50 text-blue-700 border border-blue-200">
-                {{ session('message') }}
-            </div>
-        @endif
-
-        {{-- FORM --}}
-        <form method="POST" action="{{ route('login') }}" class="px-8 pb-8 space-y-5">
-            @csrf
-
-            {{-- EMAIL --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ trans('global.login_email') }}
-                </label>
-                <input type="email"
-                       name="email"
-                       value="{{ old('email') }}"
-                       required
-                       autofocus
-                       class="w-full px-3 py-2 border rounded-md text-sm
-                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }}">
-                @if($errors->has('email'))
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $errors->first('email') }}
-                    </p>
-                @endif
-            </div>
-
-            {{-- PASSWORD --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ trans('global.login_password') }}
-                </label>
-                <input type="password"
-                       name="password"
-                       required
-                       class="w-full px-3 py-2 border rounded-md text-sm
-                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              {{ $errors->has('password') ? 'border-red-500' : 'border-gray-300' }}">
-                @if($errors->has('password'))
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $errors->first('password') }}
-                    </p>
-                @endif
-            </div>
-
-            {{-- REMEMBER + FORGOT --}}
-            <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox"
-                           name="remember"
-                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    {{ trans('global.remember_me') }}
-                </label>
-
-                @if(Route::has('password.request'))
-                    <a href="{{ route('password.request') }}"
-                       class="text-sm text-blue-600 hover:underline">
-                        {{ trans('global.forgot_password') }}
-                    </a>
-                @endif
-            </div>
-
-            {{-- LOGIN BUTTON --}}
-            <div class="pt-2">
-                <button type="submit"
-                        class="w-full py-2.5 bg-blue-600 text-white text-sm font-medium
-                               rounded-md hover:bg-blue-700 transition">
-                    {{ trans('global.login') }}
-                </button>
-            </div>
-
-            {{-- REGISTER LINK --}}
-            <div class="text-center pt-2">
-                <a href="{{ route('register') }}"
-                   class="text-sm text-blue-600 hover:underline">
-                    {{ trans('global.register') }}
-                </a>
-            </div>
-
-        </form>
     </div>
 </div>
 

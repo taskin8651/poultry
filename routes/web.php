@@ -3,6 +3,10 @@ use App\Http\Controllers\Custom\ShopController;
 use App\Http\Controllers\Custom\CartController;
 use App\Http\Controllers\Custom\CheckoutController;
 use App\Http\Controllers\Custom\OrderController;
+use App\Http\Controllers\Custom\AboutController;
+use App\Http\Controllers\Custom\ServiceController;
+use App\Http\Controllers\Custom\OfferController;
+use App\Http\Controllers\Custom\ContactController;
 
 
 Route::redirect('/', '/login');
@@ -76,6 +80,13 @@ Route::post('/update-cart', [CartController::class, 'update'])->name('cart.updat
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+Route::get('/about', [AboutController::class, 'index'])->name('about');
+Route::get('/services', [ServiceController::class, 'index'])->name('services');
+Route::get('/services/{id}', [ServiceController::class, 'show'])->name('services.show');
+Route::get('/offers', [OfferController::class, 'index'])->name('offers');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // User Dashboard
 Route::middleware(['auth'])->group(function () {

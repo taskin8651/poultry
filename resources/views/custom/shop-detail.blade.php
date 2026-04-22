@@ -2,15 +2,29 @@
 @section('content')
 
   <!-- breadcrumb -->
-        <div class="site-breadcrumb" style="background: url(assets/img/breadcrumb/breadcrumb.jpg)">
-            <div class="container">
-                <h2 class="breadcrumb-title">Shop Single</h2>
-                <ul class="breadcrumb-menu">
-                    <li><a href="index.html">Home</a></li>
-                    <li class="active">Shop Single</li>
-                </ul>
-            </div>
-        </div>
+       <div class="site-breadcrumb" style="background: url('{{ asset('assets/img/breadcrumb/breadcrumb.jpg') }}')">
+    <div class="container">
+
+        {{-- Title --}}
+        <h2 class="breadcrumb-title">
+            {{ $product->name ?? 'Shop' }}
+        </h2>
+
+        {{-- Breadcrumb --}}
+        <ul class="breadcrumb-menu">
+            <li><a href="{{ url('/') }}">Home</a></li>
+
+            <li>
+                <a href="{{ route('shop') }}">Shop</a>
+            </li>
+
+            <li class="active">
+                {{ $product->name ?? 'Product' }}
+            </li>
+        </ul>
+
+    </div>
+</div>
         <!-- breadcrumb end -->
 
 
@@ -22,36 +36,103 @@
  
             {{-- Product Gallery --}}
             <div class="col-lg-5">
-                <div class="item-gallery mb-5">
-                    <div class="flexslider-thumbnails">
-                        <ul class="slides">
-                            {{-- Thumbnail (first media image) --}}
-                            @php
-                                $thumbnail = $product->getFirstMediaUrl('product_thumbnail');
-                                $gallery   = $product->getMedia('product_gallery');
-                            @endphp
- 
-                            @if($thumbnail)
-                                <li data-thumb="{{ $thumbnail }}">
-                                    <img src="{{ $thumbnail }}" alt="{{ $product->name }}">
-                                </li>
-                            @endif
- 
-                            @foreach($gallery as $media)
-                                <li data-thumb="{{ $media->getUrl() }}">
-                                    <img src="{{ $media->getUrl() }}" alt="{{ $product->name }}">
-                                </li>
-                            @endforeach
- 
-                            @if(!$thumbnail && $gallery->isEmpty())
-                                <li data-thumb="assets/img/shop/01.png">
-                                    <img src="assets/img/shop/01.png" alt="{{ $product->name }}">
-                                </li>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <div class="product-gallery">
+
+        @php
+            $thumbnail = $product->getFirstMediaUrl('product_thumbnail');
+            $gallery   = $product->getMedia('product_gallery');
+        @endphp
+
+        {{-- 🔥 MAIN IMAGE --}}
+        <div class="main-image mb-3">
+            <img id="mainProductImage"
+                 src="{{ $thumbnail ?: ($gallery->first()?->getUrl() ?? asset('assets/img/shop/01.png')) }}"
+                 alt="{{ $product->name }}">
+        </div>
+
+        {{-- 🔽 THUMBNAILS --}}
+        <div class="thumbs d-flex flex-wrap gap-2">
+
+            {{-- Thumbnail --}}
+            @if($thumbnail)
+                <img src="{{ $thumbnail }}"
+                     class="thumb active"
+                     onclick="changeImage(this)">
+            @endif
+
+            {{-- Gallery --}}
+            @foreach($gallery as $media)
+                <img src="{{ $media->getUrl() }}"
+                     class="thumb"
+                     onclick="changeImage(this)">
+            @endforeach
+
+            {{-- Fallback --}}
+            @if(!$thumbnail && $gallery->isEmpty())
+                <img src="{{ asset('assets/img/shop/01.png') }}"
+                     class="thumb active"
+                     onclick="changeImage(this)">
+            @endif
+
+        </div>
+
+    </div>
+</div>
+<style>
+    /* main image */
+.product-gallery .main-image {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.product-gallery .main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: 0.3s;
+}
+
+/* hover zoom */
+.product-gallery .main-image img:hover {
+    transform: scale(1.05);
+}
+
+/* thumbnails */
+.product-gallery .thumbs {
+    margin-top: 10px;
+}
+
+.product-gallery .thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+/* active thumb */
+.product-gallery .thumb.active {
+    border-color: #EE7D21;
+}
+
+/* hover */
+.product-gallery .thumb:hover {
+    border-color: #EE7D21;
+}
+</style>
+
+<script>
+function changeImage(el) {
+    document.getElementById('mainProductImage').src = el.src;
+
+    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+}
+</script>
  
             {{-- Product Info --}}
             <div class="col-lg-6">
@@ -112,30 +193,113 @@
                    {{-- ===== BULK PRICE TABLE ===== --}}
 @if($product->bulkPrices->isNotEmpty())
     <div class="bulk-price-table my-3">
-        <h5 class="mb-2">Bulk Pricing:</h5>
-        <table class="table table-sm table-bordered">
+       
+
+    <h5 class="mb-3">Bulk Pricing</h5>
+
+    <div class="table-responsive">
+        <table class="table table-borderless bulk-table">
+
             <thead>
                 <tr>
                     <th>Quantity</th>
-                    <th>Price / {{ ucfirst($product->sale_type) }}</th>
+                    <th class="text-end">Price / {{ ucfirst($product->sale_type) }}</th>
                 </tr>
             </thead>
+
             <tbody>
-                {{-- Base price row (1 unit) --}}
-                <tr id="bulk-row-base" class="table-active">
-                    <td>1+</td>
-                    <td>₹ {{ number_format($product->base_price, 2) }}</td>
+
+                {{-- Base Price --}}
+                <tr class="bulk-row active">
+                    <td>
+                        <span class="qty-badge">1+</span>
+                    </td>
+                    <td class="text-end">
+                        <strong>₹ {{ number_format($product->base_price, 2) }}</strong>
+                        <span class="tag">Base</span>
+                    </td>
                 </tr>
+
+                {{-- Bulk Prices --}}
                 @foreach($product->bulkPrices as $bulk)
-                    <tr id="bulk-row-{{ $bulk->min_qty }}">
-                        <td>{{ $bulk->min_qty }}+</td>
-                        <td>₹ {{ number_format($bulk->price, 2) }}</td>
-                    </tr>
+                <tr class="bulk-row">
+                    <td>
+                        <span class="qty-badge">{{ $bulk->min_qty }}+</span>
+                    </td>
+                    <td class="text-end">
+                        ₹ {{ number_format($bulk->price, 2) }}
+
+                        {{-- 🔥 Save badge --}}
+                        @if($product->base_price > $bulk->price)
+                            <span class="save-badge">
+                                Save ₹ {{ $product->base_price - $bulk->price }}
+                            </span>
+                        @endif
+                    </td>
+                </tr>
                 @endforeach
+
             </tbody>
+
         </table>
     </div>
+</div>
 @endif
+<style>
+    /* table */
+.bulk-table {
+    width: 100%;
+}
+
+.bulk-table thead th {
+    font-size: 14px;
+    color: #777;
+    border-bottom: 1px solid #eee;
+}
+
+/* rows */
+.bulk-row {
+    transition: 0.3s;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.bulk-row:hover {
+    background: #fff8f3;
+}
+
+/* active row */
+.bulk-row.active {
+    background: #fff3e8;
+}
+
+/* quantity badge */
+.qty-badge {
+    background: #f1f1f1;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* base tag */
+.tag {
+    margin-left: 6px;
+    font-size: 11px;
+    color: #999;
+}
+
+/* save badge */
+.save-badge {
+    margin-left: 8px;
+    background: #e6fff1;
+    color: #28a745;
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+</style>
+    
 
 
  
@@ -144,13 +308,70 @@
 @if($product->stock > 0)
     <div class="single-item-action">
         <h5 class="title">Quantity:</h5>
-        <div class="cart-qty">
-            <button class="minus-btn" type="button"><i class="fal fa-minus"></i></button>
-            <input class="quantity" id="qty-input" type="number" value="1" min="1"
-                max="{{ $product->stock }}">
-            <button class="plus-btn" type="button"><i class="fal fa-plus"></i></button>
-        </div>
- 
+       <div class="cart-qty-box">
+
+    <button type="button" class="qty-btn minus-btn">
+        <i class="fal fa-minus"></i>
+    </button>
+
+    <input type="number"
+           id="qty-input"
+           class="qty-input"
+           value="1"
+           min="1"
+           max="{{ $product->stock }}">
+
+    <button type="button" class="qty-btn plus-btn">
+        <i class="fal fa-plus"></i>
+    </button>
+
+</div>
+
+
+<style>
+    .cart-qty-box {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* input */
+.qty-input {
+    width: 60px;
+    height: 45px;
+    border: none;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+}
+
+/* buttons */
+.qty-btn {
+    width: 45px;
+    height: 45px;
+    border: none;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.qty-btn:hover {
+    background: #EE7D21;
+    color: #fff;
+}
+
+/* remove arrows from input */
+.qty-input::-webkit-inner-spin-button,
+.qty-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+</style>
        
  
         <div class="item-single-btn-area">

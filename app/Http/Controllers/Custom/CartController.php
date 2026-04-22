@@ -4,43 +4,24 @@ namespace App\Http\Controllers\Custom;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Offer;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | CART SESSION STRUCTURE
-    |--------------------------------------------------------------------------
-    | session('cart') = [
-    |   product_id => [
-    |       'product_id'  => int,
-    |       'name'        => string,
-    |       'image'       => string (url),
-    |       'sale_type'   => string,
-    |       'base_price'  => float,
-    |       'bulk_prices' => [ ['min_qty'=>int, 'price'=>float], ... ],
-    |       'quantity'    => int,
-    |       'unit_price'  => float,   // applied price after bulk check
-    |       'subtotal'    => float,
-    |   ],
-    |   ...
-    | ]
-    */
-
     // -------------------------------------------------------------------------
-    // GET /cart
+    // CART PAGE
     // -------------------------------------------------------------------------
     public function index()
     {
-        $cart     = session('cart', []);
-        $summary  = $this->calcSummary($cart);
+        $cart    = session('cart', []);
+        $summary = $this->calcSummary($cart);
 
         return view('custom.cart', compact('cart', 'summary'));
     }
 
     // -------------------------------------------------------------------------
-    // POST /add-to-cart
+    // ADD TO CART
     // -------------------------------------------------------------------------
     public function add(Request $request)
     {
@@ -52,17 +33,15 @@ class CartController extends Controller
         $product = Product::with('bulkPrices')->findOrFail($request->product_id);
 
         if (!$product->status) {
-            return response()->json(['success' => false, 'message' => 'Product is unavailable.'], 422);
+            return response()->json(['success' => false, 'message' => 'Product unavailable'], 422);
         }
 
         $qty       = (int) $request->quantity;
         $unitPrice = $this->resolvePrice($product, $qty);
-        $subtotal  = round($unitPrice * $qty, 2);
 
         $cart = session('cart', []);
 
         if (isset($cart[$product->id])) {
-            // Already in cart — update qty & recalculate
             $newQty    = $cart[$product->id]['quantity'] + $qty;
             $unitPrice = $this->resolvePrice($product, $newQty);
 
@@ -77,11 +56,13 @@ class CartController extends Controller
                 'sale_type'   => $product->sale_type,
                 'base_price'  => (float) $product->base_price,
                 'bulk_prices' => $product->bulkPrices
-                                    ->map(fn($b) => ['min_qty' => (int)$b->min_qty, 'price' => (float)$b->price])
-                                    ->toArray(),
+                    ->map(fn($b) => [
+                        'min_qty' => (int)$b->min_qty,
+                        'price'   => (float)$b->price
+                    ])->toArray(),
                 'quantity'    => $qty,
                 'unit_price'  => $unitPrice,
-                'subtotal'    => $subtotal,
+                'subtotal'    => round($unitPrice * $qty, 2),
             ];
         }
 
@@ -89,34 +70,13 @@ class CartController extends Controller
 
         return response()->json([
             'success'    => true,
-            'message'    => $product->name . ' added to cart!',
+            'message'    => 'Added to cart',
             'cart_count' => count($cart),
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // POST /remove-cart
-    // -------------------------------------------------------------------------
-    public function remove(Request $request)
-    {
-        $request->validate(['product_id' => 'required|integer']);
-
-        $cart = session('cart', []);
-        unset($cart[$request->product_id]);
-        session(['cart' => $cart]);
-
-        $summary = $this->calcSummary($cart);
-
-        return response()->json([
-            'success'    => true,
-            'message'    => 'Item removed.',
-            'cart_count' => count($cart),
-            'summary'    => $summary,
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // POST /update-cart  (add this route if needed)
+    // UPDATE CART
     // -------------------------------------------------------------------------
     public function update(Request $request)
     {
@@ -128,67 +88,99 @@ class CartController extends Controller
         $cart = session('cart', []);
 
         if (!isset($cart[$request->product_id])) {
-            return response()->json(['success' => false, 'message' => 'Item not in cart.'], 404);
+            return response()->json(['success' => false], 404);
         }
 
-        $item    = &$cart[$request->product_id];
-        $qty     = (int) $request->quantity;
+        $product   = Product::with('bulkPrices')->find($request->product_id);
+        $qty       = (int) $request->quantity;
+        $unitPrice = $this->resolvePrice($product, $qty);
 
-        // Rebuild bulk_prices into collection-like array for resolvePrice
-        $product    = Product::with('bulkPrices')->find($request->product_id);
-        $unitPrice  = $this->resolvePrice($product, $qty);
-
-        $item['quantity']   = $qty;
-        $item['unit_price'] = $unitPrice;
-        $item['subtotal']   = round($unitPrice * $qty, 2);
+        $cart[$request->product_id]['quantity']   = $qty;
+        $cart[$request->product_id]['unit_price'] = $unitPrice;
+        $cart[$request->product_id]['subtotal']   = round($unitPrice * $qty, 2);
 
         session(['cart' => $cart]);
 
         $summary = $this->calcSummary($cart);
 
         return response()->json([
-            'success'   => true,
-            'subtotal'  => number_format($item['subtotal'], 2),
-            'summary'   => $summary,
+            'success' => true,
+            'summary' => $summary,
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // HELPERS
+    // REMOVE ITEM
     // -------------------------------------------------------------------------
+    public function remove(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required|integer'
+    ]);
 
-    /**
-     * Resolve unit price for a given qty using bulk pricing tiers.
-     */
+    $cart = session('cart', []);
+
+    unset($cart[$request->product_id]);
+
+    session(['cart' => $cart]);
+
+    $summary = $this->calcSummary($cart);
+
+    return response()->json([
+        'success'    => true,
+        'cart_count' => count($cart),
+        'summary'    => $summary,
+    ]);
+}
+
+    // -------------------------------------------------------------------------
+    // PRICE LOGIC (BULK)
+    // -------------------------------------------------------------------------
     private function resolvePrice(Product $product, int $qty): float
     {
-        $price = (float) $product->base_price;
+        $price = $product->base_price;
 
         foreach ($product->bulkPrices as $tier) {
             if ($qty >= $tier->min_qty) {
-                $price = (float) $tier->price;
+                $price = $tier->price;
             }
         }
 
-        return $price;
+        return (float) $price;
     }
 
-    /**
-     * Calculate cart summary (subtotal, tax, discount, total).
-     * Adjust VAT rate / discount logic as needed.
-     */
+    // -------------------------------------------------------------------------
+    // 🔥 FINAL SUMMARY (WITH OFFER)
+    // -------------------------------------------------------------------------
     private function calcSummary(array $cart): array
-    {
-        $subTotal = collect($cart)->sum('subtotal');
-        $vat      = round($subTotal * 0.05, 2);   // 5% VAT — change as needed
-        $discount = 0.00;                           // hook in coupon logic here
-        $total    = round($subTotal + $vat - $discount, 2);
+{
+    $subTotal = collect($cart)->sum('subtotal');
 
-        return [
-            'sub_total' => $subTotal,
-            'vat'       => $vat,
-            'discount'  => $discount,
-            'total'     => $total,
-        ];
+    // 🔥 OFFER APPLY
+    $offer = \App\Models\Offer::where('status', 1)
+        ->whereDate('start_date', '<=', now())
+        ->whereDate('end_date', '>=', now())
+        ->where('min_amount', '<=', $subTotal)
+        ->orderByDesc('reward_value')
+        ->first();
+
+    $discount = 0;
+
+    if ($offer) {
+        if ($offer->reward_type == 'discount') {
+            $discount = $offer->reward_value;
+        } else {
+            $discount = ($subTotal * $offer->reward_value) / 100;
+        }
     }
+
+    $total = round($subTotal - $discount, 2);
+
+    return [
+        'sub_total' => $subTotal,
+        'discount'  => $discount,
+        'offer'     => $offer?->title,
+        'total'     => max(0, $total),
+    ];
+}
 }
