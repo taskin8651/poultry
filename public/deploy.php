@@ -5,7 +5,7 @@ $signature = $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '';
 $secret = 'mysecret'; // optional
 
 // Go to your project folder
-$projectRoot = '/home/smartuni/public_html/navjiwanhatchery.web-link.site';
+$projectRoot = '/home/smartuni/public_html/navjiwanhatcherys.web-link.site';
 
 chdir($projectRoot);
 
