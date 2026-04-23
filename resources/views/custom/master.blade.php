@@ -382,6 +382,7 @@
                                 <li><a href="{{ route('about') }}"><i class="fas fa-caret-right"></i> About Us</a></li>
                                 <li><a href="{{ route('services') }}"><i class="fas fa-caret-right"></i> Services</a></li>
                                 <li><a href="{{ route('offers') }}"><i class="fas fa-caret-right"></i> Offers</a></li>
+                                <li><a href="{{ route('orders.index') }}"><i class="fas fa-caret-right"></i> Orders</a></li>
                                 <li><a href="{{ route('contact') }}"><i class="fas fa-caret-right"></i> Contact Us</a></li>
 
                                 
