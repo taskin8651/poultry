@@ -51,8 +51,29 @@
                             <strong>Total Amount:</strong>
                             <span>₹ {{ number_format($order->total_amount, 2) }}</span>
                         </li>
+                        <li>
+                            <strong>Payment Method:</strong>
+                            <span><i class="far fa-money-bill-wave"></i> Cash on Delivery</span>
+                        </li>
                     </ul>
                 </div>
+
+                {{-- Offer Cashback --}}
+                @if($offerCashback->count())
+                    <div class="checkout cart-summary text-start mb-4" style="background:#f6fbf7;border:1px solid #d7ecdd;">
+                        <h4 class="mb-30"><i class="far fa-gift text-success"></i> You Earned Cashback!</h4>
+                        @foreach($offerCashback as $tx)
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ $tx->description }}</span>
+                                <strong class="text-success">+ ₹ {{ number_format($tx->amount, 2) }}</strong>
+                            </div>
+                        @endforeach
+                        <hr class="my-2">
+                        <p class="mb-0 small text-muted">
+                            Credited straight to your <a href="{{ route('referrals.index') }}">wallet</a> — use it on your next order.
+                        </p>
+                    </div>
+                @endif
 
                 {{-- Ordered Items --}}
                 <div class="checkout cart-summary text-start mb-4">

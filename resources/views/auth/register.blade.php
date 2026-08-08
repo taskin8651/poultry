@@ -70,6 +70,24 @@
                                required>
                     </div>
 
+                    {{-- Referral Code --}}
+                    @if(request('ref'))
+                        <input type="hidden" name="referral_code" value="{{ request('ref') }}">
+                        <div class="alert alert-success py-2 px-3 mb-3">
+                            <i class="far fa-gift"></i>
+                            You were invited with code <strong>{{ request('ref') }}</strong>
+                        </div>
+                    @else
+                        <div class="form-group">
+                            <label>Referral Code <span class="text-muted">(optional)</span></label>
+                            <input type="text"
+                                   name="referral_code"
+                                   value="{{ old('referral_code') }}"
+                                   class="form-control text-uppercase"
+                                   placeholder="Enter referral code if you have one">
+                        </div>
+                    @endif
+
                     {{-- Terms --}}
                     <div class="form-check form-group">
                         <input class="form-check-input" type="checkbox" required id="agree">

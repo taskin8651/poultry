@@ -97,12 +97,18 @@
 </a>
 
     @auth
+        {{-- 👤 My Account --}}
+        <a href="{{ route('account.dashboard') }}"
+           class="nav-icon {{ request()->is('account') ? 'active-icon' : '' }}">
+            <i class="far fa-user"></i>
+        </a>
+
         {{-- 📦 Orders --}}
         @php
             $orderCount = \App\Models\Order::where('user_id', auth()->id())->count();
         @endphp
 
-        <a href="{{ route('orders.index') }}" 
+        <a href="{{ route('orders.index') }}"
            class="nav-icon {{ request()->is('my-orders*') ? 'active-icon' : '' }}">
 
             <i class="far fa-box"></i>
@@ -112,10 +118,16 @@
             @endif
         </a>
 
-        {{-- 👤 Logout --}}
+        {{-- 🎁 Refer & Earn --}}
+        <a href="{{ route('referrals.index') }}"
+           class="nav-icon {{ request()->is('my-referrals*') ? 'active-icon' : '' }}">
+            <i class="far fa-gift"></i>
+        </a>
+
+        {{-- 🚪 Logout --}}
         <a href="#" class="nav-icon"
            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="far fa-user"></i>
+            <i class="far fa-sign-out"></i>
         </a>
     @endauth
 
@@ -218,6 +230,15 @@
     </a>
 
     @auth
+        {{-- 👤 My Account --}}
+        <a href="{{ route('account.dashboard') }}"
+           class="nav-icon {{ request()->is('account') ? 'active-icon' : '' }}"
+           title="My Account">
+
+            <i class="far fa-user"></i>
+
+        </a>
+
         {{-- 📦 Orders --}}
         @php
             $orderCount = \App\Models\Order::where('user_id', auth()->id())->count();
@@ -232,6 +253,17 @@
             @if($orderCount > 0)
                 <span class="badge">{{ $orderCount }}</span>
             @endif
+
+        </a>
+
+        {{-- 🎁 Refer & Earn --}}
+        <a href="{{ route('referrals.index') }}"
+           class="nav-icon {{ request()->is('my-referrals*') ? 'active-icon' : '' }}"
+           title="Refer & Earn">
+
+            <i class="far fa-gift"></i>
+
+        </a>
              @endauth
 
         </a>
@@ -464,6 +496,8 @@
 <script src="{{ asset('assets/js/masonry.pkgd.min.js') }}"></script>
 <script src="{{ asset('assets/js/wow.min.js') }}"></script>
 <script src="{{ asset('assets/js/main.js') }}"></script>
+
+@stack('scripts')
 
 </body>
 

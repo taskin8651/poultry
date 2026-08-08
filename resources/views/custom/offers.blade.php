@@ -16,6 +16,26 @@
 <div class="container py-120">
     <div class="row g-4">
 
+        @php
+            $conditionLabel = [
+                'price' => 'Spend',
+                'kg'    => 'Buy (KG)',
+                'piece' => 'Buy (Pieces)',
+                'qty'   => 'Buy (Qty)',
+            ];
+            $conditionUnit = [
+                'price' => '₹',
+                'kg'    => ' KG',
+                'piece' => ' pcs',
+                'qty'   => '',
+            ];
+            $appliesLabel = [
+                'all' => 'All Products',
+                'egg' => 'Eggs',
+                'hen' => 'Hens',
+            ];
+        @endphp
+
         @forelse($offers as $offer)
         <div class="col-md-6 col-lg-4">
 
@@ -23,17 +43,17 @@
 
                 {{-- 🔥 Offer Badge --}}
                 <span class="offer-badge">
-                    @if($offer->reward_type == 'discount')
-                        ₹{{ $offer->reward_value }} OFF
+                    @if($offer->reward_kind == 'percent')
+                        {{ rtrim(rtrim($offer->reward_value, '0'), '.') }}% CASHBACK
                     @else
-                        {{ $offer->reward_value }}% OFF
+                        ₹{{ number_format($offer->reward_value, 0) }} CASHBACK
                     @endif
                 </span>
 
                 {{-- Image --}}
                 <div class="offer-img">
-                    <img 
-                        src="{{ $offer->getFirstMediaUrl('offer_image') ?: asset('assets/img/shop/01.png') }}" 
+                    <img
+                        src="{{ $offer->getFirstMediaUrl('offer_image') ?: asset('assets/img/shop/01.png') }}"
                         alt="{{ $offer->title }}"
                     >
                 </div>
@@ -44,9 +64,16 @@
 
                     <p>{{ Str::limit($offer->description, 80) }}</p>
 
+                    <p class="mb-2">
+                        <span class="badge bg-secondary">{{ $appliesLabel[$offer->applies_to] ?? 'All Products' }}</span>
+                    </p>
+
                     <div class="offer-meta">
-                        <span>Min: ₹{{ $offer->min_amount }}</span>
-                        <span>Valid: {{ \Carbon\Carbon::parse($offer->end_date)->format('d M') }}</span>
+                        <span>
+                            {{ $conditionLabel[$offer->condition_type] ?? 'Spend' }}
+                            {{ $conditionUnit[$offer->condition_type] ?? '' }}{{ rtrim(rtrim($offer->condition_value, '0'), '.') }}
+                        </span>
+                        <span>Valid till: {{ \Carbon\Carbon::parse($offer->end_date)->format('d M') }}</span>
                     </div>
 
                     <a href="{{ route('shop') }}" class="theme-btn btn-sm mt-2">

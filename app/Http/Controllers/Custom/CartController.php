@@ -4,20 +4,28 @@ namespace App\Http\Controllers\Custom;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\Offer;
+use App\Services\OfferService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    protected OfferService $offers;
+
+    public function __construct(OfferService $offers)
+    {
+        $this->offers = $offers;
+    }
+
     // -------------------------------------------------------------------------
     // CART PAGE
     // -------------------------------------------------------------------------
     public function index()
     {
-        $cart    = session('cart', []);
-        $summary = $this->calcSummary($cart);
+        $cart         = session('cart', []);
+        $summary      = $this->calcSummary($cart);
+        $offerPreview = $this->offers->previewForCart($cart);
 
-        return view('custom.cart', compact('cart', 'summary'));
+        return view('custom.cart', compact('cart', 'summary', 'offerPreview'));
     }
 
     // -------------------------------------------------------------------------
@@ -36,10 +44,19 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Product unavailable'], 422);
         }
 
-        $qty       = (int) $request->quantity;
-        $unitPrice = $this->resolvePrice($product, $qty);
-
+        $qty  = (int) $request->quantity;
         $cart = session('cart', []);
+
+        $newQty = $qty + ($cart[$product->id]['quantity'] ?? 0);
+
+        if ($newQty > $product->stock) {
+            return response()->json([
+                'success' => false,
+                'message' => "Only {$product->stock} {$product->sale_type} available in stock.",
+            ], 422);
+        }
+
+        $unitPrice = $this->resolvePrice($product, $qty);
 
         if (isset($cart[$product->id])) {
             $newQty    = $cart[$product->id]['quantity'] + $qty;
@@ -91,8 +108,16 @@ class CartController extends Controller
             return response()->json(['success' => false], 404);
         }
 
-        $product   = Product::with('bulkPrices')->find($request->product_id);
-        $qty       = (int) $request->quantity;
+        $product = Product::with('bulkPrices')->find($request->product_id);
+        $qty     = (int) $request->quantity;
+
+        if ($qty > $product->stock) {
+            return response()->json([
+                'success' => false,
+                'message' => "Only {$product->stock} {$product->sale_type} available in stock.",
+            ], 422);
+        }
+
         $unitPrice = $this->resolvePrice($product, $qty);
 
         $cart[$request->product_id]['quantity']   = $qty;
@@ -150,37 +175,16 @@ class CartController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // 🔥 FINAL SUMMARY (WITH OFFER)
+    // FINAL SUMMARY
     // -------------------------------------------------------------------------
     private function calcSummary(array $cart): array
-{
-    $subTotal = collect($cart)->sum('subtotal');
+    {
+        $subTotal = round(collect($cart)->sum('subtotal'), 2);
 
-    // 🔥 OFFER APPLY
-    $offer = \App\Models\Offer::where('status', 1)
-        ->whereDate('start_date', '<=', now())
-        ->whereDate('end_date', '>=', now())
-        ->where('min_amount', '<=', $subTotal)
-        ->orderByDesc('reward_value')
-        ->first();
-
-    $discount = 0;
-
-    if ($offer) {
-        if ($offer->reward_type == 'discount') {
-            $discount = $offer->reward_value;
-        } else {
-            $discount = ($subTotal * $offer->reward_value) / 100;
-        }
+        return [
+            'sub_total' => $subTotal,
+            'total_qty' => collect($cart)->sum('quantity'),
+            'total'     => $subTotal,
+        ];
     }
-
-    $total = round($subTotal - $discount, 2);
-
-    return [
-        'sub_total' => $subTotal,
-        'discount'  => $discount,
-        'offer'     => $offer?->title,
-        'total'     => max(0, $total),
-    ];
-}
 }

@@ -35,12 +35,17 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'address',
         'email_verified_at',
         'password',
         'remember_token',
         'created_at',
         'updated_at',
         'deleted_at',
+        'referral_code',
+        'referred_by',
+        'wallet_balance',
     ];
 
     protected function serializeDate(DateTimeInterface $date)
@@ -62,6 +67,45 @@ class User extends Authenticatable
                 $user->roles()->attach($registrationRole);
             }
         });
+        self::creating(function (self $user) {
+            if (empty($user->referral_code)) {
+                $user->referral_code = self::generateUniqueReferralCode();
+            }
+        });
+    }
+
+    public static function generateUniqueReferralCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (self::where('referral_code', $code)->exists());
+
+        return $code;
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(self::class, 'referred_by');
+    }
+
+    public function referredUsers()
+    {
+        return $this->hasMany(self::class, 'referred_by');
+    }
+
+    public function referralsMade()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
     public function getEmailVerifiedAtAttribute($value)

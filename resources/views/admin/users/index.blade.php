@@ -2,140 +2,153 @@
 @section('content')
 
 {{-- PAGE HEADER --}}
-<div class="mb-8 flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-900">
-            {{ trans('cruds.user.title') }}
-        </h1>
-        <p class="text-sm text-gray-500 mt-1">
-            Manage application users and their roles
-        </p>
+<div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+    <div class="flex items-center gap-4">
+
+        <div class="page-icon">
+            <i class="bi bi-people-fill"></i>
+        </div>
+
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                    {{ trans('cruds.user.title') }}
+                </h1>
+
+                <span class="badge-premium badge-info">
+                    {{ $users->count() }} {{ trans('cruds.user.title') }}
+                </span>
+            </div>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Manage application users and their roles
+            </p>
+        </div>
+
     </div>
 
     @can('user_create')
-        <a href="{{ route('admin.users.create') }}"
-           class="px-4 py-2 bg-blue-600 text-white text-sm font-medium
-                  rounded-md hover:bg-blue-700">
-            + {{ trans('global.add') }} {{ trans('cruds.user.title_singular') }}
+        <a href="{{ route('admin.users.create') }}" class="btn-premium btn-premium-primary">
+            <i class="bi bi-plus-lg"></i>
+            {{ trans('global.add') }} {{ trans('cruds.user.title_singular') }}
         </a>
     @endcan
 </div>
 
 {{-- TABLE CARD --}}
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm">
-
-    <div class="overflow-x-auto">
+<div class="card-premium overflow-hidden">
+    <div class="table-premium-wrap">
         <table class="min-w-full text-sm datatable datatable-User">
-            <thead class="bg-gray-50 border-b">
-                <tr class="text-left text-gray-600 font-medium">
-                    <th class="px-6 py-3 w-10"></th>
-                    <th class="px-6 py-3">
+            <thead>
+                <tr>
+                    <th class="w-10"></th>
+                    <th>
                         {{ trans('cruds.user.fields.id') }}
                     </th>
-                    <th class="px-6 py-3">
+                    <th>
                         {{ trans('cruds.user.fields.name') }}
                     </th>
-                    <th class="px-6 py-3">
+                    <th>
                         {{ trans('cruds.user.fields.email') }}
                     </th>
-                    <th class="px-6 py-3">
+                    <th>
                         {{ trans('cruds.user.fields.email_verified_at') }}
                     </th>
-                    <th class="px-6 py-3">
+                    <th>
                         {{ trans('cruds.user.fields.roles') }}
                     </th>
-                    <th class="px-6 py-3 text-right">
+                    <th class="text-right">
                         {{ trans('global.actions') }}
                     </th>
                 </tr>
             </thead>
 
-            <tbody class="divide-y divide-gray-100">
+            <tbody>
                 @foreach($users as $user)
-                    <tr class="hover:bg-gray-50 transition"
-                        data-entry-id="{{ $user->id }}">
+                    <tr data-entry-id="{{ $user->id }}">
 
-                        <td class="px-6 py-4"></td>
+                        <td></td>
 
-                        <td class="px-6 py-4 font-medium text-gray-900">
+                        <td class="font-bold text-slate-900">
                             #{{ $user->id }}
                         </td>
 
-                        <td class="px-6 py-4">
+                        <td>
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-blue-600 text-white
-                                            flex items-center justify-center font-semibold text-sm">
+                                <div class="flex h-9 w-9 shrink-0 items-center justify-center
+                                            rounded-full bg-gradient-to-br from-indigo-600 to-violet-600
+                                            text-sm font-bold text-white shadow-md shadow-indigo-200">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">
-                                        {{ $user->name }}
-                                    </p>
-                                </div>
+                                <p class="font-bold text-slate-800">
+                                    {{ $user->name }}
+                                </p>
                             </div>
                         </td>
 
-                        <td class="px-6 py-4 text-gray-700">
+                        <td class="text-slate-600">
                             {{ $user->email }}
                         </td>
 
-                        <td class="px-6 py-4 text-gray-600">
-                            {{ $user->email_verified_at
-                                ? $user->email_verified_at->format('d M Y')
-                                : '—' }}
+                        <td>
+                            @if($user->email_verified_at)
+                                <span class="badge-premium badge-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    {{ $user->email_verified_at->format('d M Y') }}
+                                </span>
+                            @else
+                                <span class="badge-premium badge-neutral">
+                                    &mdash;
+                                </span>
+                            @endif
                         </td>
 
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap gap-1">
+                        <td>
+                            <div class="flex flex-wrap gap-1.5">
                                 @foreach($user->roles as $role)
-                                    <span class="px-2 py-1 text-xs rounded-md
-                                                 bg-gray-100 text-gray-700
-                                                 border border-gray-200">
+                                    <span class="badge-premium badge-info">
                                         {{ $role->title }}
                                     </span>
                                 @endforeach
                             </div>
                         </td>
 
-                        <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                        <td class="text-right whitespace-nowrap">
+                            <div class="flex items-center justify-end gap-2">
 
-                            @can('user_show')
-                                <a href="{{ route('admin.users.show', $user->id) }}"
-                                   class="inline-flex items-center px-3 py-1.5
-                                          text-xs rounded-md border
-                                          border-gray-300 text-gray-700
-                                          hover:bg-gray-100">
-                                    {{ trans('global.view') }}
-                                </a>
-                            @endcan
+                                @can('user_show')
+                                    <a href="{{ route('admin.users.show', $user->id) }}"
+                                       class="btn-premium btn-premium-outline !px-3 !py-1.5 !text-xs">
+                                        <i class="bi bi-eye"></i>
+                                        {{ trans('global.view') }}
+                                    </a>
+                                @endcan
 
-                            @can('user_edit')
-                                <a href="{{ route('admin.users.edit', $user->id) }}"
-                                   class="inline-flex items-center px-3 py-1.5
-                                          text-xs rounded-md border
-                                          border-blue-600 text-blue-600
-                                          hover:bg-blue-50">
-                                    {{ trans('global.edit') }}
-                                </a>
-                            @endcan
+                                @can('user_edit')
+                                    <a href="{{ route('admin.users.edit', $user->id) }}"
+                                       class="btn-premium btn-premium-amber !px-3 !py-1.5 !text-xs">
+                                        <i class="bi bi-pencil-square"></i>
+                                        {{ trans('global.edit') }}
+                                    </a>
+                                @endcan
 
-                            @can('user_delete')
-                                <form action="{{ route('admin.users.destroy', $user->id) }}"
-                                      method="POST"
-                                      class="inline-block"
-                                      onsubmit="return confirm('{{ trans('global.areYouSure') }}');">
-                                    @method('DELETE')
-                                    @csrf
-                                    <button type="submit"
-                                            class="inline-flex items-center px-3 py-1.5
-                                                   text-xs rounded-md border
-                                                   border-red-600 text-red-600
-                                                   hover:bg-red-50">
-                                        {{ trans('global.delete') }}
-                                    </button>
-                                </form>
-                            @endcan
+                                @can('user_delete')
+                                    <form action="{{ route('admin.users.destroy', $user->id) }}"
+                                          method="POST"
+                                          class="inline-block"
+                                          onsubmit="return confirm('{{ trans('global.areYouSure') }}');">
+                                        @method('DELETE')
+                                        @csrf
+                                        <button type="submit"
+                                                class="btn-premium btn-premium-danger !px-3 !py-1.5 !text-xs">
+                                            <i class="bi bi-trash3"></i>
+                                            {{ trans('global.delete') }}
+                                        </button>
+                                    </form>
+                                @endcan
 
+                            </div>
                         </td>
                     </tr>
                 @endforeach

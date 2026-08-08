@@ -49,6 +49,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('contacts', 'ContactController');
     Route::get('settings', 'SettingController@index')->name('settings.index');
     Route::post('settings', 'SettingController@update')->name('settings.update');
+
+    Route::get('referrals', 'ReferralController@index')->name('referrals.index');
     
     Route::resource('products', 'ProductController');
     Route::post('products/delete-media',
@@ -94,5 +96,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/my-orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+
+    Route::get('/my-referrals', [\App\Http\Controllers\Custom\ReferralController::class, 'index'])->name('referrals.index');
+
+    Route::get('/account', [\App\Http\Controllers\Custom\AccountController::class, 'dashboard'])->name('account.dashboard');
+    Route::get('/account/profile', [\App\Http\Controllers\Custom\AccountController::class, 'editProfile'])->name('account.profile.edit');
+    Route::put('/account/profile', [\App\Http\Controllers\Custom\AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::get('/account/password', [\App\Http\Controllers\Custom\AccountController::class, 'editPassword'])->name('account.password.edit');
+    Route::put('/account/password', [\App\Http\Controllers\Custom\AccountController::class, 'updatePassword'])->name('account.password.update');
 
 });

@@ -2,48 +2,53 @@
 @section('content')
 
 {{-- HEADER --}}
-<div class="mb-8">
-    <div class="flex items-start justify-between">
+<div class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+    <div class="flex items-center gap-4">
+        <div class="page-icon">
+            <i class="bi bi-key-fill"></i>
+        </div>
+
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900 leading-tight">
+            <h1 class="text-2xl font-extrabold text-slate-900">
                 {{ trans('global.show') }} {{ trans('cruds.permission.title') }}
             </h1>
-            <p class="text-sm text-gray-500 mt-1">
+            <p class="mt-1 text-sm text-slate-500">
                 Permission details and configuration
             </p>
         </div>
-
-        <a href="{{ route('admin.permissions.index') }}"
-           class="inline-flex items-center text-sm text-blue-600 hover:underline">
-            ← {{ trans('global.back_to_list') }}
-        </a>
     </div>
+
+    <a href="{{ route('admin.permissions.index') }}" class="btn-premium btn-premium-outline">
+        <i class="bi bi-arrow-left"></i>
+        {{ trans('global.back_to_list') }}
+    </a>
 </div>
 
 {{-- CONTENT --}}
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm max-w-2xl">
+<div class="card-premium max-w-2xl overflow-hidden">
 
     {{-- BODY --}}
-    <div class="px-8 py-6">
+    <div class="p-6 sm:p-8">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             {{-- ID --}}
-            <div>
-                <p class="text-xs uppercase tracking-wide text-gray-500">
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     {{ trans('cruds.permission.fields.id') }}
                 </p>
-                <p class="mt-1 text-base font-semibold text-gray-900">
+                <p class="mt-1 text-sm font-extrabold text-slate-800">
                     #{{ $permission->id }}
                 </p>
             </div>
 
             {{-- TITLE --}}
-            <div>
-                <p class="text-xs uppercase tracking-wide text-gray-500">
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     {{ trans('cruds.permission.fields.title') }}
                 </p>
-                <p class="mt-1 text-base font-medium text-gray-900">
+                <p class="mt-1 text-sm font-extrabold text-slate-800">
                     {{ $permission->title }}
                 </p>
             </div>
@@ -53,20 +58,15 @@
     </div>
 
     {{-- FOOTER --}}
-    <div class="px-8 py-4 border-t bg-gray-50 flex justify-end gap-3">
+    <div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50/70 px-6 py-5 sm:px-8">
 
-        <a href="{{ route('admin.permissions.index') }}"
-           class="px-4 py-2 text-sm rounded-md
-                  border border-gray-300 text-gray-700
-                  hover:bg-gray-100">
+        <a href="{{ route('admin.permissions.index') }}" class="btn-premium btn-premium-outline">
             {{ trans('global.back_to_list') }}
         </a>
 
         @can('permission_edit')
-            <a href="{{ route('admin.permissions.edit', $permission->id) }}"
-               class="px-4 py-2 text-sm rounded-md
-                      bg-blue-600 text-white
-                      hover:bg-blue-700">
+            <a href="{{ route('admin.permissions.edit', $permission->id) }}" class="btn-premium btn-premium-primary">
+                <i class="bi bi-pencil-square"></i>
                 {{ trans('global.edit') }}
             </a>
         @endcan

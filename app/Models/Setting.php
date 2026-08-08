@@ -22,7 +22,8 @@ class Setting extends Model implements HasMedia
         'youtube',
         'meta_title',
         'meta_description',
-        'footer_text'
+        'footer_text',
+        'referral_reward_amount'
     ];
 
     public function registerMediaCollections(): void

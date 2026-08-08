@@ -8,8 +8,21 @@
 
     <title>{{ trans('panel.site_title') }}</title>
 
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     {{-- Tailwind CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+                }
+            }
+        }
+    </script>
 
     {{-- Alpine.js (dropdown, sidebar toggle etc.) --}}
     <script src="//unpkg.com/alpinejs" defer></script>
@@ -17,6 +30,9 @@
     {{-- Font Awesome --}}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    {{-- Bootstrap Icons (used by premium modules) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     {{-- Datatables --}}
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
@@ -33,27 +49,35 @@
     @yield('styles')
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-[#f7f9fc] text-slate-800 font-sans antialiased">
 
-<div class="flex min-h-screen">
+<div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
 
     {{-- SIDEBAR --}}
     @include('partials.menu')
 
+    {{-- MOBILE OVERLAY --}}
+    <div x-show="sidebarOpen"
+         x-transition.opacity
+         @click="sidebarOpen = false"
+         class="fixed inset-0 z-30 bg-slate-900/50 lg:hidden"
+         style="display:none"></div>
+
     {{-- MAIN --}}
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0">
 
         {{-- HEADER --}}
-        <header class="bg-white shadow px-6 py-3 flex justify-between items-center">
+        <header class="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 sm:px-6 py-3.5 flex justify-between items-center">
 
     {{-- LEFT --}}
     <div class="flex items-center gap-4">
-        <button class="lg:hidden">
-            <i class="fas fa-bars text-xl"></i>
+        <button @click="sidebarOpen = !sidebarOpen"
+                class="lg:hidden h-10 w-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50">
+            <i class="fas fa-bars text-lg"></i>
         </button>
 
-        <h1 class="font-semibold text-lg">
-            {{ trans('panel.site_title') }}
+        <h1 class="font-extrabold text-lg text-slate-900 tracking-tight">
+            @yield('page-title', trans('panel.site_title'))
         </h1>
     </div>
 
@@ -72,9 +96,9 @@
                 <div x-show="open"
                      x-transition
                      @click.outside="open=false"
-                     class="absolute right-0 mt-2 bg-white border rounded shadow min-w-[140px]">
+                     class="absolute right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl min-w-[140px] overflow-hidden">
                     @foreach(config('panel.available_languages') as $langLocale => $langName)
-                        <a class="block px-4 py-2 text-sm hover:bg-gray-100"
+                        <a class="block px-4 py-2 text-sm hover:bg-slate-50"
                            href="{{ url()->current() }}?change_language={{ $langLocale }}">
                             {{ strtoupper($langLocale) }} ({{ $langName }})
                         </a>
@@ -89,21 +113,21 @@
                     class="flex items-center gap-3 focus:outline-none">
 
                 {{-- Avatar --}}
-                <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-200">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
 
                 {{-- Name --}}
                 <div class="hidden sm:block text-left">
-                    <p class="text-sm font-medium leading-none">
+                    <p class="text-sm font-bold leading-none text-slate-800">
                         {{ auth()->user()->name }}
                     </p>
-                    <p class="text-xs text-gray-500">
+                    <p class="text-xs text-slate-400 mt-1">
                         {{ auth()->user()->email }}
                     </p>
                 </div>
 
-                <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                <i class="fas fa-chevron-down text-xs text-slate-400"></i>
             </button>
 
             {{-- DROPDOWN --}}
@@ -115,23 +139,23 @@
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
                  @click.outside="open=false"
-                 class="absolute right-0 mt-2 w-56 bg-white rounded shadow border">
+                 class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
 
-                <div class="px-4 py-3 border-b">
-                    <p class="text-sm font-medium">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-gray-500">{{ auth()->user()->email }}</p>
+                <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
+                    <p class="text-sm font-bold text-slate-800">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-slate-400">{{ auth()->user()->email }}</p>
                 </div>
 
                 <a href="{{ route('profile.password.edit') }}"
-                   class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100">
-                    <i class="fas fa-key text-gray-500"></i>
+                   class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-key text-slate-400 w-4"></i>
                     Change Password
                 </a>
 
                 <a href="#"
                    onclick="event.preventDefault(); document.getElementById('logoutform').submit();"
-                   class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                    <i class="fas fa-sign-out-alt"></i>
+                   class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt w-4"></i>
                     Logout
                 </a>
             </div>
@@ -141,18 +165,19 @@
 
 
         {{-- CONTENT --}}
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
 
             {{-- SUCCESS --}}
             @if(session('message'))
-                <div class="mb-4 bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded">
+                <div class="alert-premium-success mb-6">
+                    <i class="fas fa-check-circle"></i>
                     {{ session('message') }}
                 </div>
             @endif
 
             {{-- ERRORS --}}
             @if($errors->count() > 0)
-                <div class="mb-4 bg-red-100 border border-red-300 text-red-800 px-4 py-2 rounded">
+                <div class="alert-premium-error mb-6">
                     <ul class="list-disc ml-5">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>

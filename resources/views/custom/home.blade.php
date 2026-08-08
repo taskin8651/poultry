@@ -115,6 +115,21 @@
                             </p>
                         </div>
 
+        @php
+            $homeConditionLabel = [
+                'price' => 'Spend',
+                'kg'    => 'Buy (KG)',
+                'piece' => 'Buy (Pieces)',
+                'qty'   => 'Buy (Qty)',
+            ];
+            $homeConditionUnit = [
+                'price' => '₹',
+                'kg'    => ' KG',
+                'piece' => ' pcs',
+                'qty'   => '',
+            ];
+        @endphp
+
         @forelse($offers as $offer)
         <div class="col-md-6 col-lg-4">
 
@@ -122,17 +137,17 @@
 
                 {{-- 🔥 Offer Badge --}}
                 <span class="offer-badge">
-                    @if($offer->reward_type == 'discount')
-                        ₹{{ $offer->reward_value }} OFF
+                    @if($offer->reward_kind == 'percent')
+                        {{ rtrim(rtrim($offer->reward_value, '0'), '.') }}% CASHBACK
                     @else
-                        {{ $offer->reward_value }}% OFF
+                        ₹{{ number_format($offer->reward_value, 0) }} CASHBACK
                     @endif
                 </span>
 
                 {{-- Image --}}
                 <div class="offer-img">
-                    <img 
-                        src="{{ $offer->getFirstMediaUrl('offer_image') ?: asset('assets/img/shop/01.png') }}" 
+                    <img
+                        src="{{ $offer->getFirstMediaUrl('offer_image') ?: asset('assets/img/shop/01.png') }}"
                         alt="{{ $offer->title }}"
                     >
                 </div>
@@ -144,7 +159,10 @@
                     <p>{{ Str::limit($offer->description, 80) }}</p>
 
                     <div class="offer-meta">
-                        <span>Min: ₹{{ $offer->min_amount }}</span>
+                        <span>
+                            {{ $homeConditionLabel[$offer->condition_type] ?? 'Spend' }}
+                            {{ $homeConditionUnit[$offer->condition_type] ?? '' }}{{ rtrim(rtrim($offer->condition_value, '0'), '.') }}
+                        </span>
                         <span>Valid: {{ \Carbon\Carbon::parse($offer->end_date)->format('d M') }}</span>
                     </div>
 

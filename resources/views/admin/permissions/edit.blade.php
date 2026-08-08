@@ -2,73 +2,80 @@
 @section('content')
 
 {{-- PAGE HEADER --}}
-<div class="mb-6 flex items-center justify-between">
-    <div>
-        <h1 class="text-xl font-semibold text-gray-800">
-            {{ trans('global.edit') }} {{ trans('cruds.permission.title_singular') }}
-        </h1>
-        <p class="text-sm text-gray-500 mt-1">
-            Update existing permission details
-        </p>
+<div class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+    <div class="flex items-center gap-4">
+        <div class="page-icon">
+            <i class="bi bi-pencil-square"></i>
+        </div>
+
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">
+                {{ trans('global.edit') }} {{ trans('cruds.permission.title_singular') }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Update existing permission details
+            </p>
+        </div>
     </div>
 
-    <a href="{{ route('admin.permissions.index') }}"
-       class="text-sm text-blue-600 hover:underline">
-        ← {{ trans('global.back_to_list') }}
+    <a href="{{ route('admin.permissions.index') }}" class="btn-premium btn-premium-outline">
+        <i class="bi bi-arrow-left"></i>
+        {{ trans('global.back_to_list') }}
     </a>
 </div>
 
 {{-- FORM CARD --}}
-<div class="bg-white border border-gray-200 rounded-md shadow-sm max-w-xl">
+<div class="card-premium max-w-xl overflow-hidden">
 
-    <form method="POST"
-          action="{{ route('admin.permissions.update', $permission->id) }}"
-          class="p-6 space-y-6">
+    <form method="POST" action="{{ route('admin.permissions.update', $permission->id) }}">
         @method('PUT')
         @csrf
 
-        {{-- TITLE --}}
-        <div>
-            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ trans('cruds.permission.fields.title') }}
-                <span class="text-red-500">*</span>
-            </label>
+        <div class="p-6 sm:p-8">
 
-            <input type="text"
-                   name="title"
-                   id="title"
-                   value="{{ old('title', $permission->title) }}"
-                   required
-                   class="w-full px-3 py-2 border rounded-md text-sm
-                          focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                          {{ $errors->has('title') ? 'border-red-500' : 'border-gray-300' }}">
+            {{-- TITLE --}}
+            <div>
+                <label for="title" class="label-premium">
+                    {{ trans('cruds.permission.fields.title') }}
+                    <span class="text-red-500">*</span>
+                </label>
 
-            @if($errors->has('title'))
-                <p class="mt-1 text-xs text-red-600">
-                    {{ $errors->first('title') }}
-                </p>
-            @endif
+                <input type="text"
+                       name="title"
+                       id="title"
+                       value="{{ old('title', $permission->title) }}"
+                       required
+                       class="input-premium">
 
-            @if(trans('cruds.permission.fields.title_helper'))
-                <p class="mt-1 text-xs text-gray-500">
-                    {{ trans('cruds.permission.fields.title_helper') }}
-                </p>
-            @endif
+                @if($errors->has('title'))
+                    <p class="mt-1 text-xs font-medium text-red-500">
+                        {{ $errors->first('title') }}
+                    </p>
+                @endif
+
+                @if(trans('cruds.permission.fields.title_helper'))
+                    <p class="mt-1 text-xs text-slate-400">
+                        {{ trans('cruds.permission.fields.title_helper') }}
+                    </p>
+                @endif
+            </div>
+
         </div>
 
         {{-- ACTIONS --}}
-        <div class="flex items-center gap-3 pt-4">
-            <button type="submit"
-                    class="inline-flex items-center px-4 py-2
-                           bg-blue-600 text-white text-sm font-medium
-                           rounded-md hover:bg-blue-700">
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-100
+                    bg-slate-50/70 p-6 sm:flex-row sm:justify-end sm:p-8">
+
+            <a href="{{ route('admin.permissions.index') }}" class="btn-premium btn-premium-outline">
+                {{ trans('global.cancel') }}
+            </a>
+
+            <button type="submit" class="btn-premium btn-premium-primary">
+                <i class="bi bi-check2-circle"></i>
                 {{ trans('global.save') }}
             </button>
 
-            <a href="{{ route('admin.permissions.index') }}"
-               class="text-sm text-gray-600 hover:underline">
-                {{ trans('global.cancel') }}
-            </a>
         </div>
 
     </form>

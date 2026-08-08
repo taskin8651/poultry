@@ -2,74 +2,80 @@
 @section('content')
 
 {{-- PAGE HEADER --}}
-<div class="mb-8 flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-900">
-            {{ trans('cruds.role.title_singular') }} {{ trans('global.list') }}
-        </h1>
-        <p class="text-sm text-gray-500 mt-1">
-            Manage roles and assigned permissions
-        </p>
+<div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+    <div class="flex items-center gap-4">
+        <div class="page-icon">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                    {{ trans('cruds.role.title_singular') }} {{ trans('global.list') }}
+                </h1>
+
+                <span class="badge-premium badge-info">
+                    {{ $roles->count() }} Roles
+                </span>
+            </div>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Manage roles and assigned permissions
+            </p>
+        </div>
     </div>
 
     @can('role_create')
-        <a href="{{ route('admin.roles.create') }}"
-           class="inline-flex items-center px-4 py-2
-                  bg-blue-600 text-white text-sm font-medium
-                  rounded-md hover:bg-blue-700">
-            + {{ trans('global.add') }} {{ trans('cruds.role.title_singular') }}
+        <a href="{{ route('admin.roles.create') }}" class="btn-premium btn-premium-primary">
+            <i class="bi bi-plus-lg"></i>
+            {{ trans('global.add') }} {{ trans('cruds.role.title_singular') }}
         </a>
     @endcan
 </div>
 
 {{-- TABLE CARD --}}
-<div class="bg-white border border-gray-200 rounded-lg shadow-sm">
-
-    <div class="overflow-x-auto">
+<div class="card-premium overflow-hidden">
+    <div class="table-premium-wrap">
         <table class="min-w-full text-sm datatable-Role">
 
-            {{-- HEAD --}}
-            <thead class="bg-gray-50 border-b text-gray-600">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3 w-8"></th>
-                    <th class="px-4 py-3 text-left">
+                    <th class="w-8"></th>
+                    <th>
                         {{ trans('cruds.role.fields.id') }}
                     </th>
-                    <th class="px-4 py-3 text-left">
+                    <th>
                         {{ trans('cruds.role.fields.title') }}
                     </th>
-                    <th class="px-4 py-3 text-left">
+                    <th>
                         {{ trans('cruds.role.fields.permissions') }}
                     </th>
-                    <th class="px-4 py-3 text-center">
+                    <th class="text-center">
                         {{ trans('global.actions') }}
                     </th>
                 </tr>
             </thead>
 
-            {{-- BODY --}}
-            <tbody class="divide-y">
+            <tbody>
                 @foreach($roles as $role)
-                    <tr data-entry-id="{{ $role->id }}"
-                        class="hover:bg-gray-50 transition">
+                    <tr data-entry-id="{{ $role->id }}">
 
-                        <td class="px-4 py-2"></td>
+                        <td></td>
 
-                        <td class="px-4 py-2 font-medium text-gray-800">
+                        <td class="font-bold text-slate-900">
                             {{ $role->id }}
                         </td>
 
-                        <td class="px-4 py-2 text-gray-900 font-medium">
+                        <td class="font-bold text-slate-800">
                             {{ $role->title }}
                         </td>
 
                         {{-- PERMISSIONS --}}
-                        <td class="px-4 py-2">
-                            <div class="flex flex-wrap gap-1 max-w-xl">
+                        <td>
+                            <div class="flex max-w-xl flex-wrap gap-1.5">
                                 @foreach($role->permissions as $permission)
-                                    <span
-                                        class="px-2 py-0.5 text-xs rounded
-                                               bg-gray-100 text-gray-700 border">
+                                    <span class="badge-premium badge-info">
                                         {{ $permission->title }}
                                     </span>
                                 @endforeach
@@ -77,36 +83,41 @@
                         </td>
 
                         {{-- ACTIONS --}}
-                        <td class="px-4 py-2 text-center space-x-3">
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-2">
 
-                            @can('role_show')
-                                <a href="{{ route('admin.roles.show', $role->id) }}"
-                                   class="text-blue-600 hover:underline text-xs">
-                                    {{ trans('global.view') }}
-                                </a>
-                            @endcan
+                                @can('role_show')
+                                    <a href="{{ route('admin.roles.show', $role->id) }}"
+                                       class="btn-premium btn-premium-outline !px-3 !py-1.5 !text-xs">
+                                        <i class="bi bi-eye"></i>
+                                        {{ trans('global.view') }}
+                                    </a>
+                                @endcan
 
-                            @can('role_edit')
-                                <a href="{{ route('admin.roles.edit', $role->id) }}"
-                                   class="text-indigo-600 hover:underline text-xs">
-                                    {{ trans('global.edit') }}
-                                </a>
-                            @endcan
+                                @can('role_edit')
+                                    <a href="{{ route('admin.roles.edit', $role->id) }}"
+                                       class="btn-premium btn-premium-amber !px-3 !py-1.5 !text-xs">
+                                        <i class="bi bi-pencil-square"></i>
+                                        {{ trans('global.edit') }}
+                                    </a>
+                                @endcan
 
-                            @can('role_delete')
-                                <form action="{{ route('admin.roles.destroy', $role->id) }}"
-                                      method="POST"
-                                      class="inline-block"
-                                      onsubmit="return confirm('{{ trans('global.areYouSure') }}');">
-                                    @method('DELETE')
-                                    @csrf
-                                    <button type="submit"
-                                            class="text-red-600 hover:underline text-xs">
-                                        {{ trans('global.delete') }}
-                                    </button>
-                                </form>
-                            @endcan
+                                @can('role_delete')
+                                    <form action="{{ route('admin.roles.destroy', $role->id) }}"
+                                          method="POST"
+                                          class="inline-block"
+                                          onsubmit="return confirm('{{ trans('global.areYouSure') }}');">
+                                        @method('DELETE')
+                                        @csrf
+                                        <button type="submit"
+                                                class="btn-premium btn-premium-danger !px-3 !py-1.5 !text-xs">
+                                            <i class="bi bi-trash3"></i>
+                                            {{ trans('global.delete') }}
+                                        </button>
+                                    </form>
+                                @endcan
 
+                            </div>
                         </td>
                     </tr>
                 @endforeach

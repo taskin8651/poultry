@@ -168,7 +168,30 @@
                             @endforeach
                         </div>
 
+                        @if(count($offerPreview))
+                            <div class="mb-3 p-3" style="background:#fff7ed;border:1px solid #fde3c4;border-radius:8px;">
+                                <p class="mb-2 fw-bold"><i class="far fa-gift text-warning"></i> You'll earn cashback on this order:</p>
+                                @foreach($offerPreview as $entry)
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span>{{ $entry['offer']->title }}</span>
+                                        <strong class="text-success">+ ₹ {{ number_format($entry['reward'], 2) }}</strong>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
                         <hr>
+
+                        @if($user->wallet_balance > 0)
+                            <div class="form-check mb-3 p-3" style="background:#f6fbf7;border:1px solid #d7ecdd;border-radius:8px;">
+                                <input class="form-check-input" type="checkbox" name="use_wallet" value="1" id="use-wallet" {{ old('use_wallet') ? 'checked' : '' }}>
+                                <label class="form-check-label" for="use-wallet">
+                                    <i class="far fa-wallet text-success"></i>
+                                    Use wallet balance
+                                    <strong>(₹ {{ number_format($user->wallet_balance, 2) }} available)</strong>
+                                </label>
+                            </div>
+                        @endif
 
                         <ul>
                             <li>
@@ -179,13 +202,27 @@
                                 <strong>Sub Total:</strong>
                                 <span>₹ {{ number_format($summary['sub_total'], 2) }}</span>
                             </li>
+                            @if($user->wallet_balance > 0)
+                                <li id="wallet-discount-row" style="display:none;">
+                                    <strong>Wallet Applied:</strong>
+                                    <span id="wallet-discount-amount">- ₹ 0.00</span>
+                                </li>
+                            @endif
                             <li class="cart-total">
                                 <strong>Total Pay:</strong>
-                                <span>₹ {{ number_format($summary['total'], 2) }}</span>
+                                <span id="final-total-amount">₹ {{ number_format($summary['total'], 2) }}</span>
                             </li>
                         </ul>
 
-                        <div class="text-end mt-40">
+                        <div class="d-flex align-items-center gap-2 p-3 mb-3" style="background:#f8f9fa;border-radius:8px;">
+                            <i class="far fa-money-bill-wave" style="color:#EE7D21;font-size:20px;"></i>
+                            <div>
+                                <strong class="d-block">Cash on Delivery</strong>
+                                <small class="text-muted">Pay in cash when your order is delivered.</small>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-4">
                             <button type="submit" class="theme-btn" id="place-order-btn">
                                 Place Order <i class="far fa-arrow-right"></i>
                             </button>
@@ -219,6 +256,28 @@
 
     sameAsBilling.addEventListener('change', toggleShipping);
     toggleShipping(); // init
+
+    // Live-preview wallet deduction (server recalculates the real amount on submit)
+    const useWalletCheckbox = document.getElementById('use-wallet');
+    if (useWalletCheckbox) {
+        const walletBalance   = {{ (float) $user->wallet_balance }};
+        const orderTotal      = {{ (float) $summary['total'] }};
+        const discountRow     = document.getElementById('wallet-discount-row');
+        const discountAmount  = document.getElementById('wallet-discount-amount');
+        const finalTotal      = document.getElementById('final-total-amount');
+
+        useWalletCheckbox.addEventListener('change', function () {
+            const applied = Math.min(walletBalance, orderTotal);
+            if (this.checked) {
+                discountRow.style.display = '';
+                discountAmount.textContent = '- ₹ ' + applied.toFixed(2);
+                finalTotal.textContent = '₹ ' + (orderTotal - applied).toFixed(2);
+            } else {
+                discountRow.style.display = 'none';
+                finalTotal.textContent = '₹ ' + orderTotal.toFixed(2);
+            }
+        });
+    }
 
     // Prevent double submit
     document.getElementById('checkout-form').addEventListener('submit', function () {

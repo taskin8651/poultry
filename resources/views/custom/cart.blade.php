@@ -97,20 +97,16 @@
                                     </span>
                                 </li>
 
-                              
-
-                                @if($summary['discount'] > 0)
+                                @if(count($offerPreview))
                                 <li>
-                                    <strong>Offer Discount:</strong>
-                                    <span class="text-success">
-                                        - ₹ {{ number_format($summary['discount'], 2) }}
-                                    </span>
-                                </li>
-
-                                <li>
-                                    <small class="text-success">
-                                        🎉 {{ $summary['offer'] }} applied
+                                    <small class="text-success d-block mb-1">
+                                        <i class="far fa-gift"></i> Cashback you'll earn on this order:
                                     </small>
+                                    @foreach($offerPreview as $entry)
+                                        <small class="text-success d-block">
+                                            🎉 {{ $entry['offer']->title }} — +₹{{ number_format($entry['reward'], 2) }} to wallet
+                                        </small>
+                                    @endforeach
                                 </li>
                                 @endif
 
@@ -182,7 +178,13 @@ function qtyChange(id) {
         body: JSON.stringify({ product_id: id, quantity: qty })
     })
     .then(res => res.json())
-    .then(data => updateSummary(data.summary));
+    .then(data => {
+        if (!data.success) {
+            alert(data.message || 'Could not update quantity.');
+            return;
+        }
+        updateSummary(data.summary);
+    });
 }
 
 // plus

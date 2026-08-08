@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Referral;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -50,9 +51,10 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'      => ['required', 'string', 'min:8', 'confirmed'],
+            'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
         ]);
     }
 
@@ -64,10 +66,27 @@ class RegisterController extends Controller
           */
          protected function create(array $data)
          {
-             return User::create([
-                 'name'     => $data['name'],
-                 'email'    => $data['email'],
-                 'password' => Hash::make($data['password']),
+             $referrer = null;
+
+             if (! empty($data['referral_code'])) {
+                 $referrer = User::where('referral_code', $data['referral_code'])->first();
+             }
+
+             $user = User::create([
+                 'name'        => $data['name'],
+                 'email'       => $data['email'],
+                 'password'    => Hash::make($data['password']),
+                 'referred_by' => $referrer?->id,
              ]);
+
+             if ($referrer) {
+                 Referral::create([
+                     'referrer_id' => $referrer->id,
+                     'referred_id' => $user->id,
+                     'status'      => 'pending',
+                 ]);
+             }
+
+             return $user;
          }
 }

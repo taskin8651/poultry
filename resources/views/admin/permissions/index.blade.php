@@ -2,91 +2,109 @@
 @section('content')
 
 {{-- PAGE HEADER --}}
-<div class="mb-6 flex items-center justify-between">
-    <div>
-        <h1 class="text-xl font-semibold text-gray-800">
-            {{ trans('cruds.permission.title_singular') }} {{ trans('global.list') }}
-        </h1>
-        <p class="text-sm text-gray-500 mt-1">
-            Manage system permissions
-        </p>
+<div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+    <div class="flex items-center gap-4">
+        <div class="page-icon">
+            <i class="bi bi-key-fill"></i>
+        </div>
+
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                    {{ trans('cruds.permission.title_singular') }} {{ trans('global.list') }}
+                </h1>
+
+                <span class="badge-premium badge-info">
+                    {{ $permissions->count() }} Permissions
+                </span>
+            </div>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Manage system permissions
+            </p>
+        </div>
     </div>
 
     @can('permission_create')
-        <a href="{{ route('admin.permissions.create') }}"
-           class="inline-flex items-center px-4 py-2 text-sm font-medium
-                  bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            + {{ trans('global.add') }} {{ trans('cruds.permission.title_singular') }}
+        <a href="{{ route('admin.permissions.create') }}" class="btn-premium btn-premium-primary">
+            <i class="bi bi-plus-lg"></i>
+            {{ trans('global.add') }} {{ trans('cruds.permission.title_singular') }}
         </a>
     @endcan
 </div>
 
 {{-- TABLE CARD --}}
-<div class="bg-white border border-gray-200 rounded-md shadow-sm">
-
-    <div class="overflow-x-auto">
+<div class="card-premium overflow-hidden">
+    <div class="table-premium-wrap">
         <table class="min-w-full text-sm datatable-Permission">
 
-            <thead class="bg-gray-50 border-b text-gray-600">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3 w-8"></th>
-                    <th class="px-4 py-3 text-left">
+                    <th class="w-8"></th>
+                    <th>
                         {{ trans('cruds.permission.fields.id') }}
                     </th>
-                    <th class="px-4 py-3 text-left">
+                    <th>
                         {{ trans('cruds.permission.fields.title') }}
                     </th>
-                    <th class="px-4 py-3 text-center">
+                    <th class="text-center">
                         {{ trans('global.actions') }}
                     </th>
                 </tr>
             </thead>
 
-            <tbody class="divide-y">
+            <tbody>
                 @foreach($permissions as $permission)
-                    <tr data-entry-id="{{ $permission->id }}"
-                        class="hover:bg-gray-50 transition">
+                    <tr data-entry-id="{{ $permission->id }}">
 
-                        <td class="px-4 py-2"></td>
+                        <td></td>
 
-                        <td class="px-4 py-2 font-medium text-gray-800">
+                        <td class="font-bold text-slate-900">
                             {{ $permission->id }}
                         </td>
 
-                        <td class="px-4 py-2 text-gray-700">
-                            {{ $permission->title }}
+                        <td class="font-semibold text-slate-700">
+                            <span class="badge-premium badge-neutral">
+                                {{ $permission->title }}
+                            </span>
                         </td>
 
-                        <td class="px-4 py-2 text-center space-x-2">
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-2">
 
-                            @can('permission_show')
-                                <a href="{{ route('admin.permissions.show', $permission->id) }}"
-                                   class="text-blue-600 hover:underline text-xs">
-                                    {{ trans('global.view') }}
-                                </a>
-                            @endcan
+                                @can('permission_show')
+                                    <a href="{{ route('admin.permissions.show', $permission->id) }}"
+                                       class="btn-premium btn-premium-outline !px-3 !py-1.5 !text-xs">
+                                        <i class="bi bi-eye"></i>
+                                        {{ trans('global.view') }}
+                                    </a>
+                                @endcan
 
-                            @can('permission_edit')
-                                <a href="{{ route('admin.permissions.edit', $permission->id) }}"
-                                   class="text-indigo-600 hover:underline text-xs">
-                                    {{ trans('global.edit') }}
-                                </a>
-                            @endcan
+                                @can('permission_edit')
+                                    <a href="{{ route('admin.permissions.edit', $permission->id) }}"
+                                       class="btn-premium btn-premium-amber !px-3 !py-1.5 !text-xs">
+                                        <i class="bi bi-pencil-square"></i>
+                                        {{ trans('global.edit') }}
+                                    </a>
+                                @endcan
 
-                            @can('permission_delete')
-                                <form action="{{ route('admin.permissions.destroy', $permission->id) }}"
-                                      method="POST"
-                                      class="inline-block"
-                                      onsubmit="return confirm('{{ trans('global.areYouSure') }}');">
-                                    @method('DELETE')
-                                    @csrf
-                                    <button type="submit"
-                                            class="text-red-600 hover:underline text-xs">
-                                        {{ trans('global.delete') }}
-                                    </button>
-                                </form>
-                            @endcan
+                                @can('permission_delete')
+                                    <form action="{{ route('admin.permissions.destroy', $permission->id) }}"
+                                          method="POST"
+                                          class="inline-block"
+                                          onsubmit="return confirm('{{ trans('global.areYouSure') }}');">
+                                        @method('DELETE')
+                                        @csrf
+                                        <button type="submit"
+                                                class="btn-premium btn-premium-danger !px-3 !py-1.5 !text-xs">
+                                            <i class="bi bi-trash3"></i>
+                                            {{ trans('global.delete') }}
+                                        </button>
+                                    </form>
+                                @endcan
 
+                            </div>
                         </td>
                     </tr>
                 @endforeach

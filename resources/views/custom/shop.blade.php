@@ -151,24 +151,29 @@
         @forelse($products as $product)
             <div class="col-md-6 col-lg-4">
                 <div class="shop-item">
-                    
+
                     <div class="shop-item-img">
-                        <span class="shop-item-sale">Sale</span>
+                        @if($product->stock <= 0)
+                            <span class="shop-item-sale" style="background:#6c757d;">Out of Stock</span>
+                        @else
+                            <span class="shop-item-sale">Sale</span>
+                        @endif
 
                         {{-- Product Image (Spatie Media) --}}
-                        <img 
-                            src="{{ $product->getFirstMediaUrl('product_thumbnail') ?: asset('assets/img/shop/01.png') }}" 
+                        <img
+                            src="{{ $product->getFirstMediaUrl('product_thumbnail') ?: asset('assets/img/shop/01.png') }}"
                             alt="{{ $product->name }}"
+                            style="{{ $product->stock <= 0 ? 'opacity:0.5;' : '' }}"
                         >
 
                         <div class="shop-item-meta">
                             <a href="#"><i class="far fa-heart"></i></a>
-                            <a href="#"><i class="far fa-shopping-cart"></i></a>
+                            <a href="{{ route('shop.show', $product->slug) }}"><i class="far fa-shopping-cart"></i></a>
                         </div>
                     </div>
 
                     <div class="shop-item-info">
-                        
+
                         {{-- Sale Type --}}
                         <div class="shop-item-qty">
                             {{ ucfirst($product->sale_type) }}
