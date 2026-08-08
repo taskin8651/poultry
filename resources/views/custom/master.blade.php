@@ -80,7 +80,7 @@
                         <img src="{{ $setting->logo ?? asset('assets/img/logo/logo.png') }}" alt="logo">
                     </a>
                     <div class="mobile-menu-right">
-                      <div class="header-nav-icons d-lg-none d-lg-flex align-items-center gap-3">
+                      <div class="header-nav-icons d-flex d-lg-none align-items-center gap-3">
 
     {{-- 🛒 Cart --}}
     @php
@@ -141,30 +141,6 @@
 
 </div>
 
-     <style>
-       .nav-icon {
-    position: relative;
-    font-size: 18px;
-    color: #333;
-    margin-left: 10px;
-    transition: 0.3s;
-}
-
-.nav-icon:hover {
-    color: #EE7D21;
-}
-
-.nav-icon .badge {
-    position: absolute;
-    top: -5px;
-    right: -6px;
-    background: #EE7D21;
-    color: #fff;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 50%;
-}
-    </style>
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                             data-bs-target="#main_nav" aria-expanded="false" aria-label="Toggle navigation">
                             <i class="far fa-stream"></i>
