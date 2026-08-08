@@ -12,16 +12,18 @@ use App\Http\Controllers\Custom\HomeController;
 
 Route::redirect('/', '/login');
 Route::get('/home', function () {
+    $target = auth()->user()?->is_admin ? 'admin.home' : 'account.dashboard';
+
     if (session('status')) {
-        return redirect()->route('admin.home')->with('status', session('status'));
+        return redirect()->route($target)->with('status', session('status'));
     }
 
-    return redirect()->route('admin.home');
-});
+    return redirect()->route($target);
+})->middleware('auth');
 
 Auth::routes();
 
-Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth', 'is_admin']], function () {
     Route::get('/', 'HomeController@index')->name('home');
     // Permissions
     Route::delete('permissions/destroy', 'PermissionsController@massDestroy')->name('permissions.massDestroy');

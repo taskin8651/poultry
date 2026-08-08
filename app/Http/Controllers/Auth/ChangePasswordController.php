@@ -15,6 +15,12 @@ class ChangePasswordController extends Controller
     {
         abort_if(Gate::denies('profile_password_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
+        // This is the admin-panel-themed password page — customers get their
+        // own site-themed equivalent under /account/password instead.
+        if (! auth()->user()->is_admin) {
+            return redirect()->route('account.password.edit');
+        }
+
         return view('auth.passwords.edit');
     }
 
