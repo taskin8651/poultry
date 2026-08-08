@@ -16,7 +16,7 @@ class OrderController extends Controller
     ->latest()
     ->paginate(10);
 
-        return view('custom.orders.index', compact('orders'));
+        return view('user.orders.index', compact('orders'));
     }
 
     // 🔍 Single Order Detail
@@ -26,6 +26,6 @@ class OrderController extends Controller
             ->where('user_id', auth()->id()) // 🔐 security
             ->findOrFail($id);
 
-        return view('custom.orders.show', compact('order'));
+        return view('user.orders.show', compact('order'));
     }
 }

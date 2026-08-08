@@ -17,14 +17,16 @@
 
         {{-- SIDEBAR --}}
         <div class="col-lg-3">
-            <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden;">
-                <div class="p-4 text-center text-white" style="background:linear-gradient(135deg,#EE7D21,#f7a24d);">
-                    <div class="mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold"
-                         style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.25);font-size:24px;">
+            <div class="card border-0 shadow-sm mb-4 user-profile-card">
+                <div class="p-4 text-center text-white user-profile-card-head">
+                    <div class="mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold user-avatar">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                     <h6 class="mb-0 text-white">{{ auth()->user()->name }}</h6>
                     <small class="opacity-75">{{ auth()->user()->email }}</small>
+                    <div class="small opacity-75 mt-1">
+                        <i class="far fa-calendar-alt"></i> Member since {{ auth()->user()->created_at->format('M Y') }}
+                    </div>
                 </div>
 
                 <div class="list-group list-group-flush">
@@ -97,6 +99,20 @@
 </div>
 
 <style>
+    .user-profile-card{
+        border-radius:14px;
+        overflow:hidden;
+    }
+    .user-profile-card-head{
+        background:linear-gradient(135deg,#EE7D21,#f7a24d);
+    }
+    .user-avatar{
+        width:64px;
+        height:64px;
+        border-radius:50%;
+        background:rgba(255,255,255,.25);
+        font-size:24px;
+    }
     .list-group-item-action {
         border: none;
         padding: 14px 20px;
@@ -113,6 +129,14 @@
         color: #EE7D21;
         border-left: 3px solid #EE7D21;
         font-weight: 700;
+    }
+    .user-stat-card{
+        border-radius:12px;
+        transition: 0.25s;
+    }
+    .user-stat-card:hover{
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,.08) !important;
     }
 </style>
 

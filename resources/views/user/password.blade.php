@@ -1,4 +1,4 @@
-@extends('custom.account.layout')
+@extends('user.layout')
 
 @section('account-title', 'Change Password')
 
@@ -14,15 +14,25 @@
 
             <div class="mb-3">
                 <label class="form-label fw-bold">Current Password</label>
-                <input type="password" name="current_password" class="form-control" required>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="far fa-lock"></i></span>
+                    <input type="password" name="current_password" class="form-control" required>
+                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">New Password</label>
-                <input type="password" name="password" class="form-control" minlength="8" required>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="far fa-key"></i></span>
+                    <input type="password" name="password" class="form-control" minlength="8" required>
+                </div>
+                <small class="text-muted">Minimum 8 characters.</small>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Confirm New Password</label>
-                <input type="password" name="password_confirmation" class="form-control" minlength="8" required>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="far fa-key"></i></span>
+                    <input type="password" name="password_confirmation" class="form-control" minlength="8" required>
+                </div>
             </div>
 
             <div class="text-end mt-4">

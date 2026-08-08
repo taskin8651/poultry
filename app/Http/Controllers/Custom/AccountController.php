@@ -36,7 +36,7 @@ class AccountController extends Controller
             ->take(5)
             ->get();
 
-        return view('custom.account.dashboard', compact('user', 'stats', 'recentOrders'));
+        return view('user.dashboard', compact('user', 'stats', 'recentOrders'));
     }
 
     // -------------------------------------------------------------------------
@@ -44,7 +44,7 @@ class AccountController extends Controller
     // -------------------------------------------------------------------------
     public function editProfile()
     {
-        return view('custom.account.profile', ['user' => Auth::user()]);
+        return view('user.profile', ['user' => Auth::user()]);
     }
 
     // -------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class AccountController extends Controller
     // -------------------------------------------------------------------------
     public function editPassword()
     {
-        return view('custom.account.password');
+        return view('user.password');
     }
 
     // -------------------------------------------------------------------------

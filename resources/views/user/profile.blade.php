@@ -1,4 +1,4 @@
-@extends('custom.account.layout')
+@extends('user.layout')
 
 @section('account-title', 'Edit Profile')
 
@@ -15,19 +15,31 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Full Name</label>
-                    <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="far fa-user"></i></span>
+                        <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Email Address</label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="far fa-envelope"></i></span>
+                        <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Phone Number</label>
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="e.g. +91 98765 43210">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="far fa-phone"></i></span>
+                        <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="e.g. +91 98765 43210">
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Referral Code</label>
-                    <input type="text" class="form-control text-uppercase" value="{{ $user->referral_code }}" disabled>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="far fa-gift"></i></span>
+                        <input type="text" class="form-control text-uppercase" value="{{ $user->referral_code }}" disabled>
+                    </div>
                 </div>
                 <div class="col-12">
                     <label class="form-label fw-bold">Delivery Address</label>

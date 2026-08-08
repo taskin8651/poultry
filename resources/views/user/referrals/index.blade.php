@@ -1,4 +1,4 @@
-@extends('custom.account.layout')
+@extends('user.layout')
 
 @section('account-title', 'Refer & Earn')
 
@@ -70,25 +70,25 @@
 {{-- STATS --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
+        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
             <h4 class="mb-0">{{ $referrals->count() }}</h4>
             <small class="text-muted">Total Invited</small>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
+        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
             <h4 class="mb-0 text-success">{{ $referrals->where('status', 'rewarded')->count() }}</h4>
             <small class="text-muted">Rewarded</small>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
+        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
             <h4 class="mb-0 text-warning">{{ $referrals->where('status', 'pending')->count() }}</h4>
             <small class="text-muted">Awaiting First Order</small>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
+        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
             <h4 class="mb-0" style="color:#EE7D21;">₹ {{ number_format($referrals->where('status', 'rewarded')->sum('reward_amount'), 2) }}</h4>
             <small class="text-muted">Total Earned</small>
         </div>

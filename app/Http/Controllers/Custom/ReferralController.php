@@ -26,6 +26,6 @@ class ReferralController extends Controller
             ->take(20)
             ->get();
 
-        return view('custom.referrals.index', compact('user', 'referrals', 'walletTransactions'));
+        return view('user.referrals.index', compact('user', 'referrals', 'walletTransactions'));
     }
 }

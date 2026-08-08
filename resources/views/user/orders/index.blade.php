@@ -1,4 +1,4 @@
-@extends('custom.account.layout')
+@extends('user.layout')
 
 @section('account-title', 'My Orders')
 
