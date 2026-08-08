@@ -30,6 +30,8 @@
 <link rel="stylesheet" href="{{ asset('assets/css/owl.carousel.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 
+@stack('styles')
+
 </head>
 
 <body>

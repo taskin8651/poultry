@@ -134,11 +134,4 @@
     </a>
 </div>
 
-<style>
-    @media print {
-        .no-print, header, footer, .col-lg-3, .user-topbar { display: none !important; }
-        .col-lg-9 { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; }
-    }
-</style>
-
 @endsection
