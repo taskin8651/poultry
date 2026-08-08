@@ -311,6 +311,7 @@
 .user-table tbody tr:hover{background:#FBFBFD;}
 
 @media (max-width:991px){
+    .user-panel{padding-top:230px;}
     .user-topbar-title{font-size:22px;}
     .user-card-body{padding:20px;}
 }
