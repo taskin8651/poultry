@@ -1,6 +1,7 @@
 @extends('user.layout')
 
 @section('account-title', 'Refer & Earn')
+@section('account-subtitle', 'Invite friends and earn wallet cashback on their first order.')
 
 @section('account-content')
 
@@ -13,36 +14,40 @@
 
     {{-- REFERRAL CODE / SHARE CARD --}}
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm h-100" style="border-radius:14px;">
-            <div class="card-body p-4">
-                <h4 class="mb-2"><i class="far fa-gift text-warning"></i> Refer friends, earn wallet cash</h4>
-                <p class="text-muted mb-4">
+        <div class="user-card h-100">
+            <div class="user-card-body">
+                <h4 class="mb-2 fw-bold"><i class="far fa-gift" style="color:var(--up-warning);"></i> Refer friends, earn wallet cash</h4>
+                <p class="mb-4" style="color:var(--up-muted);">
                     Share your referral code with friends. When someone signs up with your code
                     and places their first order, you get rewarded straight into your wallet.
                 </p>
 
-                <label class="fw-bold mb-2">Your Referral Code</label>
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control fw-bold text-uppercase" id="referral-code" value="{{ $user->referral_code }}" readonly>
-                    <button class="theme-btn" type="button" onclick="copyText('referral-code', this)">
-                        <i class="far fa-copy"></i> Copy Code
-                    </button>
+                <div class="user-field">
+                    <label>Your Referral Code</label>
+                    <div class="input-group">
+                        <input type="text" class="user-input fw-bold text-uppercase" style="padding-left:16px;" id="referral-code" value="{{ $user->referral_code }}" readonly>
+                        <button class="user-btn" type="button" onclick="copyText('referral-code', this)">
+                            <i class="far fa-copy"></i> Copy Code
+                        </button>
+                    </div>
                 </div>
 
-                <label class="fw-bold mb-2">Your Referral Link</label>
-                <div class="input-group mb-4">
-                    <input type="text" class="form-control" id="referral-link" value="{{ $referralLink }}" readonly>
-                    <button class="theme-btn" type="button" onclick="copyText('referral-link', this)">
-                        <i class="far fa-link"></i> Copy Link
-                    </button>
+                <div class="user-field mb-0">
+                    <label>Your Referral Link</label>
+                    <div class="input-group">
+                        <input type="text" class="user-input" style="padding-left:16px;" id="referral-link" value="{{ $referralLink }}" readonly>
+                        <button class="user-btn" type="button" onclick="copyText('referral-link', this)">
+                            <i class="far fa-link"></i> Copy Link
+                        </button>
+                    </div>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2">
-                    <a class="theme-btn" target="_blank"
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <a class="user-btn user-btn-outline" target="_blank"
                        href="https://wa.me/?text={{ urlencode($shareText) }}">
                         <i class="fab fa-whatsapp"></i> Share on WhatsApp
                     </a>
-                    <a class="theme-btn" target="_blank"
+                    <a class="user-btn user-btn-outline" target="_blank"
                        href="mailto:?subject={{ urlencode('Join me and get rewards') }}&body={{ urlencode($shareText) }}">
                         <i class="far fa-envelope"></i> Share via Email
                     </a>
@@ -53,12 +58,12 @@
 
     {{-- WALLET BALANCE CARD --}}
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm h-100 text-white" style="border-radius:14px;background:linear-gradient(135deg,#EE7D21,#f7a24d);">
-            <div class="card-body p-4 d-flex flex-column justify-content-center text-center">
+        <div class="user-card h-100" style="background:linear-gradient(135deg,var(--up-primary),var(--up-primary-dark));border:none;">
+            <div class="user-card-body d-flex flex-column justify-content-center text-center text-white h-100">
                 <i class="far fa-wallet fa-2x mb-3"></i>
-                <p class="mb-1 opacity-75">Wallet Balance</p>
+                <p class="mb-1" style="opacity:.85;">Wallet Balance</p>
                 <h2 class="fw-bold mb-0">₹ {{ number_format($user->wallet_balance, 2) }}</h2>
-                <p class="mt-3 mb-0 small opacity-75">
+                <p class="mt-3 mb-0 small" style="opacity:.85;">
                     Used automatically at checkout when you tick "Use wallet balance".
                 </p>
             </div>
@@ -70,38 +75,38 @@
 {{-- STATS --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
-            <h4 class="mb-0">{{ $referrals->count() }}</h4>
-            <small class="text-muted">Total Invited</small>
+        <div class="user-stat-tile">
+            <p class="user-stat-value">{{ $referrals->count() }}</p>
+            <span class="user-stat-label">Total Invited</span>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
-            <h4 class="mb-0 text-success">{{ $referrals->where('status', 'rewarded')->count() }}</h4>
-            <small class="text-muted">Rewarded</small>
+        <div class="user-stat-tile">
+            <p class="user-stat-value" style="color:var(--up-success);">{{ $referrals->where('status', 'rewarded')->count() }}</p>
+            <span class="user-stat-label">Rewarded</span>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
-            <h4 class="mb-0 text-warning">{{ $referrals->where('status', 'pending')->count() }}</h4>
-            <small class="text-muted">Awaiting First Order</small>
+        <div class="user-stat-tile">
+            <p class="user-stat-value" style="color:var(--up-warning);">{{ $referrals->where('status', 'pending')->count() }}</p>
+            <span class="user-stat-label">Awaiting Order</span>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm text-center p-3 user-stat-card">
-            <h4 class="mb-0" style="color:#EE7D21;">₹ {{ number_format($referrals->where('status', 'rewarded')->sum('reward_amount'), 2) }}</h4>
-            <small class="text-muted">Total Earned</small>
+        <div class="user-stat-tile">
+            <p class="user-stat-value" style="color:var(--up-primary);">₹ {{ number_format($referrals->where('status', 'rewarded')->sum('reward_amount'), 2) }}</p>
+            <span class="user-stat-label">Total Earned</span>
         </div>
     </div>
 </div>
 
 {{-- REFERRALS LIST --}}
-<div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-    <div class="card-header bg-white fw-bold">People You've Invited</div>
-    <div class="card-body p-0">
+<div class="user-card mb-4">
+    <div class="user-card-header">People You've Invited</div>
+    <div class="user-card-body-flush">
         <div class="table-responsive">
-            <table class="table mb-0 align-middle">
-                <thead class="bg-light">
+            <table class="table user-table mb-0 align-middle">
+                <thead>
                     <tr>
                         <th class="ps-4">Name</th>
                         <th>Joined</th>
@@ -116,9 +121,9 @@
                             <td>{{ $referral->created_at->format('d M Y') }}</td>
                             <td>
                                 @if($referral->status === 'rewarded')
-                                    <span class="badge bg-success">Rewarded</span>
+                                    <span class="user-badge user-badge-delivered">Rewarded</span>
                                 @else
-                                    <span class="badge bg-warning text-dark">Awaiting First Order</span>
+                                    <span class="user-badge user-badge-pending">Awaiting Order</span>
                                 @endif
                             </td>
                             <td class="pe-4 text-end fw-bold">
@@ -127,7 +132,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
+                            <td colspan="4" class="user-empty border-0">
                                 You haven't invited anyone yet. Share your code to start earning!
                             </td>
                         </tr>
@@ -139,12 +144,12 @@
 </div>
 
 {{-- WALLET HISTORY --}}
-<div class="card border-0 shadow-sm" style="border-radius:14px;">
-    <div class="card-header bg-white fw-bold">Wallet History</div>
-    <div class="card-body p-0">
+<div class="user-card">
+    <div class="user-card-header">Wallet History</div>
+    <div class="user-card-body-flush">
         <div class="table-responsive">
-            <table class="table mb-0 align-middle">
-                <thead class="bg-light">
+            <table class="table user-table mb-0 align-middle">
+                <thead>
                     <tr>
                         <th class="ps-4">Description</th>
                         <th>Date</th>
@@ -156,13 +161,13 @@
                         <tr>
                             <td class="ps-4">{{ $tx->description }}</td>
                             <td>{{ $tx->created_at->format('d M Y, h:i A') }}</td>
-                            <td class="pe-4 text-end fw-bold {{ $tx->type === 'credit' ? 'text-success' : 'text-danger' }}">
+                            <td class="pe-4 text-end fw-bold" style="color:{{ $tx->type === 'credit' ? 'var(--up-success)' : 'var(--up-danger)' }};">
                                 {{ $tx->type === 'credit' ? '+' : '-' }} ₹ {{ number_format($tx->amount, 2) }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="text-center py-5 text-muted">
+                            <td colspan="3" class="user-empty border-0">
                                 No wallet activity yet.
                             </td>
                         </tr>

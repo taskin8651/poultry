@@ -1,42 +1,43 @@
 @extends('user.layout')
 
 @section('account-title', 'Change Password')
+@section('account-subtitle', 'Keep your account secure with a strong password.')
 
 @section('account-content')
 
-<div class="card border-0 shadow-sm" style="border-radius:14px;max-width:520px;">
-    <div class="card-header bg-white fw-bold">Change Password</div>
-    <div class="card-body p-4">
+<div class="user-card" style="max-width:560px;">
+    <div class="user-card-header">Change Password</div>
+    <div class="user-card-body">
 
         <form method="POST" action="{{ route('account.password.update') }}">
             @csrf
             @method('PUT')
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Current Password</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="far fa-lock"></i></span>
-                    <input type="password" name="current_password" class="form-control" required>
+            <div class="user-field">
+                <label>Current Password</label>
+                <div class="user-input-wrap">
+                    <i class="far fa-lock"></i>
+                    <input type="password" name="current_password" class="user-input" required>
                 </div>
             </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">New Password</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="far fa-key"></i></span>
-                    <input type="password" name="password" class="form-control" minlength="8" required>
+            <div class="user-field">
+                <label>New Password</label>
+                <div class="user-input-wrap">
+                    <i class="far fa-key"></i>
+                    <input type="password" name="password" class="user-input" minlength="8" required>
                 </div>
-                <small class="text-muted">Minimum 8 characters.</small>
+                <span class="user-field-hint">Minimum 8 characters.</span>
             </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Confirm New Password</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="far fa-key"></i></span>
-                    <input type="password" name="password_confirmation" class="form-control" minlength="8" required>
+            <div class="user-field">
+                <label>Confirm New Password</label>
+                <div class="user-input-wrap">
+                    <i class="far fa-key"></i>
+                    <input type="password" name="password_confirmation" class="user-input" minlength="8" required>
                 </div>
             </div>
 
             <div class="text-end mt-4">
-                <button type="submit" class="theme-btn">
+                <button type="submit" class="user-btn">
                     <i class="far fa-lock"></i> Update Password
                 </button>
             </div>
