@@ -9,4 +9,7 @@ Route::group(['prefix' => 'v1','as' => 'api.','namespace' => 'Api\V1\Admin'], fu
     // 🔐 User Login
     Route::post('login', 'AuthApiController@login')->name('login');
 
+    // 👤 User Profile By ID
+    Route::get('user-profile/{id}', 'AuthApiController@profile')->name('user.profile');
+
 });
