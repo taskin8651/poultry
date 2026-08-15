@@ -20,7 +20,7 @@
     <title>{{ $setting->title ?? 'Poultryfarm - Poultry Farm HTML5 Template' }}</title>
 
    <!-- favicon -->
-<link rel="icon" type="image/x-icon" href="{{ asset('assets/img/logo/favicon.png') }}">
+<link rel="icon" type="image/x-icon" href="{{ $setting->getFirstMediaUrl('favicon') ?: asset('assets/img/logo/favicon.png') }}">
 
 <!-- css -->
 <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
@@ -77,7 +77,7 @@
             <nav class="navbar navbar-expand-lg">
                 <div class="container">
                     <a class="navbar-brand" href="{{ url('/') }}">
-                        <img src="{{ $setting->logo ?? asset('assets/img/logo/logo.png') }}" alt="logo">
+                        <img src="{{ $setting->getFirstMediaUrl('logo') ?: asset('assets/img/logo/logo.png') }}" alt="logo">
                     </a>
                     <div class="mobile-menu-right">
                       <div class="header-nav-icons d-flex d-lg-none align-items-center gap-3">
@@ -372,7 +372,7 @@
                     <div class="col-md-6 col-lg-4">
                         <div class="footer-widget-box about-us">
                             <a href="{{ url('/') }}" class="footer-logo">
-                                <img src="{{ $setting->logo ?? 'assets/img/logo/logo-light.png' }}" alt="">
+                                <img src="{{ $setting->getFirstMediaUrl('logo') ?: asset('assets/img/logo/logo-light.png') }}" alt="">
                             </a>
                             <p class="mb-20">
                                {{ $setting->footer_text ?? 'Default description about the company or website goes here. You can replace this with actual content.' }}

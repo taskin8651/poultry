@@ -9,10 +9,18 @@
 
     {{-- BRAND --}}
     <div class="px-6 py-5 border-b border-white/10 flex items-center gap-3">
-        <div class="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500
-                    flex items-center justify-center shadow-lg shadow-indigo-900/50">
-            <i class="fas fa-feather-pointed text-white"></i>
-        </div>
+        @php
+            $__logoUrl = ($__setting ?? null)?->getFirstMediaUrl('logo');
+        @endphp
+        @if($__logoUrl)
+            <img src="{{ $__logoUrl }}" alt="Logo"
+                 class="h-10 w-10 shrink-0 rounded-xl object-cover shadow-lg shadow-indigo-900/50">
+        @else
+            <div class="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500
+                        flex items-center justify-center shadow-lg shadow-indigo-900/50">
+                <i class="fas fa-feather-pointed text-white"></i>
+            </div>
+        @endif
         <div class="min-w-0">
             <div class="text-base font-extrabold tracking-wide truncate">
                 {{ trans('panel.site_title') }}
