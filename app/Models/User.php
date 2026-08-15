@@ -14,9 +14,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
+use Laravel\Sanctum\HasApiTokens;
+
 class User extends Authenticatable
 {
-    use SoftDeletes, Notifiable, HasFactory;
+    use HasApiTokens, SoftDeletes, Notifiable, HasFactory;
 
     public $table = 'users';
 
@@ -77,7 +79,7 @@ class User extends Authenticatable
     public static function generateUniqueReferralCode(): string
     {
         do {
-            $code = strtoupper(Str::random(6));
+            $code = strtoupper(Str::random(10));
         } while (self::where('referral_code', $code)->exists());
 
         return $code;
