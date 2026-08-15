@@ -1,3 +1,6 @@
+@php
+    $__setting = \App\Models\Setting::first();
+@endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 
@@ -7,6 +10,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ trans('panel.site_title') }}</title>
+
+    {{-- Favicon --}}
+    <link rel="icon" type="image/x-icon"
+          href="{{ $__setting?->getFirstMediaUrl('favicon') ?: asset('assets/img/logo/favicon.png') }}">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
