@@ -82,7 +82,7 @@ class AuthApiController extends Controller
             'address' => 'required|string|max:500',
 
             // Existing user's referral code
-            'refer_code' => 'required|string|size:10',
+            'refer_code' => 'nullable|string|size:10',
 
             'password' => 'required|string|min:6',
         ]);
