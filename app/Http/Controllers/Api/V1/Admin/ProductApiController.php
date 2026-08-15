@@ -9,6 +9,77 @@ use Illuminate\Http\Request;
 class ProductApiController extends Controller
 {
     /**
+     * Get All Products
+     */
+    public function index(Request $request)
+    {
+        $products = Product::with([
+            'category:id,name',
+            'tags:id,name',
+            'bulkPrices:id,product_id,min_qty,price',
+        ])
+        ->where('status', 1)
+        ->latest()
+        ->get();
+
+        $data = $products->map(function ($product) {
+
+            // Thumbnail
+            $thumbnail = $product->getFirstMedia('product_thumbnail');
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+
+                'category' => $product->category ? [
+                    'id' => $product->category->id,
+                    'name' => $product->category->name,
+                ] : null,
+
+                'type' => $product->type,
+                'sale_type' => $product->sale_type,
+
+                'base_price' => $product->base_price,
+                'current_price' => $product->getPrice(1),
+
+                'stock' => $product->stock,
+
+                'description' => $product->description,
+
+                'status' => $product->status,
+
+                'thumbnail' => $thumbnail
+                    ? $thumbnail->getUrl()
+                    : null,
+
+                'tags' => $product->tags->map(function ($tag) {
+                    return [
+                        'id' => $tag->id,
+                        'name' => $tag->name,
+                    ];
+                })->values(),
+
+                'bulk_prices' => $product->bulkPrices->map(function ($bulk) {
+                    return [
+                        'id' => $bulk->id,
+                        'min_qty' => $bulk->min_qty,
+                        'price' => $bulk->price,
+                    ];
+                })->values(),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Products fetched successfully.',
+            'total' => $data->count(),
+            'products' => $data,
+        ], 200);
+    }
+
+
+    /**
      * Get Product Details By ID
      */
     public function show($id)
@@ -26,54 +97,17 @@ class ProductApiController extends Controller
             ], 404);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Product Thumbnail
-        |--------------------------------------------------------------------------
-        */
-
         $thumbnail = $product->getFirstMedia('product_thumbnail');
 
-        $thumbnailUrl = $thumbnail
-            ? $thumbnail->getUrl()
-            : null;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Product Gallery
-        |--------------------------------------------------------------------------
-        */
-
-        $gallery = $product->getMedia('product_gallery')->map(function ($media) {
-            return [
-                'id' => $media->id,
-                'url' => $media->getUrl(),
-                'name' => $media->name,
-            ];
-        })->values();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Bulk Prices
-        |--------------------------------------------------------------------------
-        */
-
-        $bulkPrices = $product->bulkPrices->map(function ($bulk) {
-            return [
-                'id' => $bulk->id,
-                'min_qty' => $bulk->min_qty,
-                'price' => $bulk->price,
-            ];
-        })->values();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Response
-        |--------------------------------------------------------------------------
-        */
+        $gallery = $product->getMedia('product_gallery')
+            ->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'url' => $media->getUrl(),
+                    'name' => $media->name,
+                ];
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
@@ -93,14 +127,14 @@ class ProductApiController extends Controller
                 'sale_type' => $product->sale_type,
 
                 'base_price' => $product->base_price,
-
                 'stock' => $product->stock,
 
                 'description' => $product->description,
-
                 'status' => $product->status,
 
-                'thumbnail' => $thumbnailUrl,
+                'thumbnail' => $thumbnail
+                    ? $thumbnail->getUrl()
+                    : null,
 
                 'gallery' => $gallery,
 
@@ -111,55 +145,21 @@ class ProductApiController extends Controller
                     ];
                 })->values(),
 
-                'bulk_prices' => $bulkPrices,
-
-                /*
-                |--------------------------------------------------------------------------
-                | Example Price
-                |--------------------------------------------------------------------------
-                |
-                | Default quantity = 1
-                |
-                */
+                'bulk_prices' => $product->bulkPrices
+                    ->map(function ($bulk) {
+                        return [
+                            'id' => $bulk->id,
+                            'min_qty' => $bulk->min_qty,
+                            'price' => $bulk->price,
+                        ];
+                    })
+                    ->values(),
 
                 'current_price' => $product->getPrice(1),
 
                 'created_at' => $product->created_at,
                 'updated_at' => $product->updated_at,
             ],
-        ], 200);
-    }
-
-
-    /**
-     * Get Product Price By Quantity
-     */
-    public function price(Request $request, $id)
-    {
-        $request->validate([
-            'qty' => 'required|numeric|min:1',
-        ]);
-
-        $product = Product::with('bulkPrices')
-            ->find($id);
-
-        if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product not found.',
-            ], 404);
-        }
-
-        $qty = $request->qty;
-
-        $price = $product->getPrice($qty);
-
-        return response()->json([
-            'success' => true,
-            'product_id' => $product->id,
-            'quantity' => $qty,
-            'price' => $price,
-            'total' => $price * $qty,
         ], 200);
     }
 }

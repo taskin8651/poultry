@@ -12,10 +12,10 @@ Route::group(['prefix' => 'v1','as' => 'api.','namespace' => 'Api\V1\Admin'], fu
     // 👤 User Profile By ID
     Route::get('user-profile/{id}', 'AuthApiController@profile')->name('user.profile');
 
-    // 🛒 Product Details
-    Route::get('products/{id}','ProductApiController@show')->name('products.show');
+    // 🛒 All Products
+    Route::get('products','ProductApiController@index')->name('products.index');
 
-    // 💰 Product Price By Quantity
-    Route::get('products/{id}/price','ProductApiController@price')->name('products.price');
+    // 🛒 Single Product
+    Route::get('products/{id}','ProductApiController@show')->name('products.show');
 
 });
