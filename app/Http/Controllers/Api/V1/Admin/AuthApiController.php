@@ -60,39 +60,46 @@ class AuthApiController extends Controller
     /**
      * User Register
      */
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
+    /**
+ * User Register
+ */
+public function register(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
 
-            'phone' => [
-                'required',
-                'string',
-                'max:20',
-                'unique:users,phone',
-            ],
+        'phone' => [
+            'required',
+            'string',
+            'max:20',
+            'unique:users,phone',
+        ],
 
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                'unique:users,email',
-            ],
+        'email' => [
+            'required',
+            'email',
+            'max:255',
+            'unique:users,email',
+        ],
 
-            'address' => 'required|string|max:500',
+        'address' => 'required|string|max:500',
 
-            // Existing user's referral code
-            'refer_code' => 'nullable|string|size:10',
+        // Referral code is optional
+        'refer_code' => 'nullable|string|size:10',
 
-            'password' => 'required|string|min:6',
-        ]);
+        'password' => 'required|string|min:6',
+    ]);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Find Referrer
-        |--------------------------------------------------------------------------
-        */
+    /*
+    |--------------------------------------------------------------------------
+    | Find Referrer
+    |--------------------------------------------------------------------------
+    */
+
+    $referrer = null;
+
+    if ($request->filled('refer_code')) {
 
         $referrer = User::where(
             'referral_code',
@@ -105,62 +112,40 @@ class AuthApiController extends Controller
                 'message' => 'Invalid referral code.',
             ], 422);
         }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create User + Referral
+    |--------------------------------------------------------------------------
+    */
+
+    DB::beginTransaction();
+
+    try {
+
+        // Create User
+        // referral_code automatically User model se generate hoga
+        $user = User::create([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'password' => $request->password,
+
+            // Agar referral nahi hai to NULL
+            'referred_by' => $referrer ? $referrer->id : null,
+        ]);
 
 
         /*
         |--------------------------------------------------------------------------
-        | Prevent Self Referral
+        | Create Referral Record Only If Referral Code Provided
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $referrer->email === $request->email ||
-            $referrer->phone === $request->phone
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid referral.',
-            ], 422);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create User + Referral
-        |--------------------------------------------------------------------------
-        */
-
-        DB::beginTransaction();
-
-        try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create User
-            |--------------------------------------------------------------------------
-            |
-            | User model ke creating event se referral_code automatically
-            | 10 character uppercase alphanumeric generate hoga.
-            |
-            */
-
-            $user = User::create([
-                'name' => $request->name,
-                'phone' => $request->phone,
-                'email' => $request->email,
-                'address' => $request->address,
-                'password' => $request->password,
-
-                // Referrer User ID
-                'referred_by' => $referrer->id,
-            ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create Referral Record
-            |--------------------------------------------------------------------------
-            */
+        if ($referrer) {
 
             Referral::create([
                 'referrer_id' => $referrer->id,
@@ -170,59 +155,61 @@ class AuthApiController extends Controller
                 'reward_amount' => 0,
                 'rewarded_at' => null,
             ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create Login Token
-            |--------------------------------------------------------------------------
-            */
-
-            $token = $user->createToken('api-token')->plainTextToken;
-
-
-            DB::commit();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Success Response
-            |--------------------------------------------------------------------------
-            */
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful.',
-
-                'token' => $token,
-                'token_type' => 'Bearer',
-
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'phone' => $user->phone,
-                    'email' => $user->email,
-                    'address' => $user->address,
-
-                    // New user's automatically generated referral code
-                    'referral_code' => $user->referral_code,
-
-                    // Referrer user ID
-                    'referred_by' => $user->referred_by,
-
-                    'wallet_balance' => $user->wallet_balance,
-                ],
-            ], 201);
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Registration failed.',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Login Token
+        |--------------------------------------------------------------------------
+        */
+
+        $token = $user->createToken('api-token')->plainTextToken;
+
+
+        DB::commit();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success Response
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration successful.',
+
+            'token' => $token,
+            'token_type' => 'Bearer',
+
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'email' => $user->email,
+                'address' => $user->address,
+
+                // Automatically generated 10 digit/character referral code
+                'referral_code' => $user->referral_code,
+
+                // Referrer ID, otherwise null
+                'referred_by' => $user->referred_by,
+
+                'wallet_balance' => $user->wallet_balance,
+            ],
+        ], 201);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Registration failed.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 }
