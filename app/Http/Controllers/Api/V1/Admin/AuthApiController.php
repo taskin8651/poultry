@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -28,130 +30,199 @@ class AuthApiController extends Controller
             ]);
         }
 
-        // Purane tokens delete
+        // Delete previous tokens
         $user->tokens()->delete();
 
-        // New Sanctum token
+        // Create new Sanctum token
         $token = $user->createToken('api-token')->plainTextToken;
-
-        // Referral data
-        $referrals = $user->referralsMade()
-            ->with([
-                'referred:id,name,email,phone,referral_code',
-                'order:id'
-            ])
-            ->latest()
-            ->get();
 
         return response()->json([
             'success' => true,
             'message' => 'Login successful.',
+
             'token' => $token,
             'token_type' => 'Bearer',
 
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
-                'email' => $user->email,
                 'phone' => $user->phone,
+                'email' => $user->email,
                 'address' => $user->address,
                 'referral_code' => $user->referral_code,
                 'referred_by' => $user->referred_by,
                 'wallet_balance' => $user->wallet_balance,
-
-                // Referral summary
-                'referral_count' => $referrals->count(),
-                'total_reward' => $referrals->sum('reward_amount'),
-
-                // Referral list
-                'referrals' => $referrals->map(function ($referral) {
-                    return [
-                        'id' => $referral->id,
-                        'referred_user_id' => $referral->referred_id,
-                        'referred_user' => $referral->referred ? [
-                            'id' => $referral->referred->id,
-                            'name' => $referral->referred->name,
-                            'email' => $referral->referred->email,
-                            'phone' => $referral->referred->phone,
-                            'referral_code' => $referral->referred->referral_code,
-                        ] : null,
-
-                        'order_id' => $referral->order_id,
-                        'status' => $referral->status,
-                        'reward_amount' => $referral->reward_amount,
-                        'rewarded_at' => $referral->rewarded_at,
-                    ];
-                })->values(),
             ],
         ], 200);
     }
 
 
     /**
-     * Logout
+     * User Register
      */
-    public function logout(Request $request)
+    public function register(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->validate([
+            'name' => 'required|string|max:255',
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout successful.',
-        ]);
-    }
-
-
-    /**
-     * Logged-in User
-     */
-    public function user(Request $request)
-    {
-        $user = $request->user();
-
-        $referrals = $user->referralsMade()
-            ->with([
-                'referred:id,name,email,phone,referral_code',
-                'order:id'
-            ])
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'address' => $user->address,
-                'referral_code' => $user->referral_code,
-                'referred_by' => $user->referred_by,
-                'wallet_balance' => $user->wallet_balance,
-
-                'referral_count' => $referrals->count(),
-                'total_reward' => $referrals->sum('reward_amount'),
-
-                'referrals' => $referrals->map(function ($referral) {
-                    return [
-                        'id' => $referral->id,
-                        'referred_user_id' => $referral->referred_id,
-
-                        'referred_user' => $referral->referred ? [
-                            'id' => $referral->referred->id,
-                            'name' => $referral->referred->name,
-                            'email' => $referral->referred->email,
-                            'phone' => $referral->referred->phone,
-                            'referral_code' => $referral->referred->referral_code,
-                        ] : null,
-
-                        'order_id' => $referral->order_id,
-                        'status' => $referral->status,
-                        'reward_amount' => $referral->reward_amount,
-                        'rewarded_at' => $referral->rewarded_at,
-                    ];
-                })->values(),
+            'phone' => [
+                'required',
+                'string',
+                'max:20',
+                'unique:users,phone',
             ],
+
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email',
+            ],
+
+            'address' => 'required|string|max:500',
+
+            // Existing user's referral code
+            'refer_code' => 'required|string|size:10',
+
+            'password' => 'required|string|min:6',
         ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find Referrer
+        |--------------------------------------------------------------------------
+        */
+
+        $referrer = User::where(
+            'referral_code',
+            strtoupper($request->refer_code)
+        )->first();
+
+        if (!$referrer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid referral code.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Self Referral
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $referrer->email === $request->email ||
+            $referrer->phone === $request->phone
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid referral.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create User + Referral
+        |--------------------------------------------------------------------------
+        */
+
+        DB::beginTransaction();
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create User
+            |--------------------------------------------------------------------------
+            |
+            | User model ke creating event se referral_code automatically
+            | 10 character uppercase alphanumeric generate hoga.
+            |
+            */
+
+            $user = User::create([
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address,
+                'password' => $request->password,
+
+                // Referrer User ID
+                'referred_by' => $referrer->id,
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Referral Record
+            |--------------------------------------------------------------------------
+            */
+
+            Referral::create([
+                'referrer_id' => $referrer->id,
+                'referred_id' => $user->id,
+                'order_id' => null,
+                'status' => 'pending',
+                'reward_amount' => 0,
+                'rewarded_at' => null,
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Login Token
+            |--------------------------------------------------------------------------
+            */
+
+            $token = $user->createToken('api-token')->plainTextToken;
+
+
+            DB::commit();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success Response
+            |--------------------------------------------------------------------------
+            */
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful.',
+
+                'token' => $token,
+                'token_type' => 'Bearer',
+
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'phone' => $user->phone,
+                    'email' => $user->email,
+                    'address' => $user->address,
+
+                    // New user's automatically generated referral code
+                    'referral_code' => $user->referral_code,
+
+                    // Referrer user ID
+                    'referred_by' => $user->referred_by,
+
+                    'wallet_balance' => $user->wallet_balance,
+                ],
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration failed.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

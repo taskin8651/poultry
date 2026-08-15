@@ -79,7 +79,7 @@ class User extends Authenticatable
     public static function generateUniqueReferralCode(): string
     {
         do {
-            $code = strtoupper(Str::random(6));
+            $code = strtoupper(Str::random(10));
         } while (self::where('referral_code', $code)->exists());
 
         return $code;
