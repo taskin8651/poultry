@@ -524,7 +524,7 @@ function changeImage(el) {
                             </div>
                             <div class="shop-item-info">
                                 <div class="shop-item-qty">{{ ucfirst($related->sale_type) }}</div>
-                                <a href="{{ route('shop.detail', $related->slug) }}">
+                                <a href="{{ route('shop.show', $related->slug) }}">
                                     <h4 class="shop-item-title">{{ $related->name }}</h4>
                                 </a>
                                 <div class="shop-item-price">
