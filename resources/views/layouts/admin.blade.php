@@ -114,6 +114,42 @@
             </div>
         @endif
 
+        {{-- NOTIFICATIONS --}}
+        <div x-data="{ notifOpen: false }">
+            <button @click="notifOpen = true; window.loadAdminNotifications && window.loadAdminNotifications()"
+                    class="relative h-10 w-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50">
+                <i class="fas fa-bell"></i>
+                <span id="admin-notif-badge"
+                      class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+            </button>
+
+            {{-- MODAL --}}
+            <div x-show="notifOpen"
+                 x-transition.opacity
+                 @keydown.escape.window="notifOpen = false"
+                 class="fixed inset-0 z-[9999] bg-slate-900/50 flex items-start justify-center pt-20 px-4"
+                 style="display:none">
+                <div @click.outside="notifOpen = false"
+                     x-transition
+                     class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+                    <div class="flex items-center justify-between px-5 py-4 bg-gradient-to-br from-indigo-600 to-violet-600 text-white">
+                        <h3 class="font-bold flex items-center gap-2"><i class="fas fa-bell"></i> Notifications</h3>
+                        <button @click="notifOpen = false" class="text-white/80 hover:text-white">&times;</button>
+                    </div>
+
+                    <div id="admin-notif-list" class="max-h-96 overflow-y-auto divide-y divide-slate-100">
+                        <div class="text-center text-slate-400 text-sm py-10">No notifications yet.</div>
+                    </div>
+
+                    <div class="flex items-center justify-between px-5 py-3 border-t border-slate-100">
+                        <span id="admin-notif-count-label" class="text-xs text-slate-400"></span>
+                        <button id="admin-notif-mark-all" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Mark all as read</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- USER DROPDOWN --}}
         <div class="relative" x-data="{open:false}">
             <button @click="open = !open"
@@ -208,6 +244,113 @@ $(function () {
         pageLength: 25
     });
 });
+</script>
+
+<script>
+(function () {
+    var badge      = document.getElementById('admin-notif-badge');
+    var list       = document.getElementById('admin-notif-list');
+    var countLabel = document.getElementById('admin-notif-count-label');
+    var markAllBtn = document.getElementById('admin-notif-mark-all');
+    var csrf       = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    var styles = {
+        success: { icon: 'fa-circle-check', color: 'text-emerald-500' },
+        error:   { icon: 'fa-circle-exclamation', color: 'text-red-500' },
+        warning: { icon: 'fa-triangle-exclamation', color: 'text-amber-500' },
+        info:    { icon: 'fa-circle-info', color: 'text-indigo-500' }
+    };
+
+    function updateBadge(count) {
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function renderList(items) {
+        list.innerHTML = '';
+
+        if (!items.length) {
+            list.innerHTML = '<div class="text-center text-slate-400 text-sm py-10">No notifications yet.</div>';
+            countLabel.textContent = '';
+            return;
+        }
+
+        var unread = items.filter(function (n) { return !n.read; }).length;
+        countLabel.textContent = unread + ' unread';
+
+        items.forEach(function (n) {
+            var s = styles[n.type] || styles.info;
+            var row = document.createElement('div');
+            row.className = 'flex gap-3 px-5 py-3.5 cursor-pointer hover:bg-slate-50 ' + (n.read ? '' : 'bg-indigo-50/50');
+
+            var icon = document.createElement('i');
+            icon.className = 'fas ' + s.icon + ' mt-0.5 ' + s.color;
+
+            var body = document.createElement('div');
+            body.className = 'flex-1 min-w-0';
+            body.innerHTML =
+                '<p class="text-sm font-semibold text-slate-800"></p>' +
+                '<p class="text-xs text-slate-500 mt-0.5"></p>' +
+                '<p class="text-xs text-slate-400 mt-1"></p>';
+            body.children[0].textContent = n.title;
+            body.children[1].textContent = n.message;
+            body.children[2].textContent = n.time;
+
+            row.appendChild(icon);
+            row.appendChild(body);
+
+            row.addEventListener('click', function () {
+                fetch('/notifications/' + n.id + '/read', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+                }).then(function () {
+                    if (n.url) {
+                        window.location.href = n.url;
+                    } else {
+                        window.loadAdminNotifications();
+                    }
+                });
+            });
+
+            list.appendChild(row);
+        });
+    }
+
+    window.loadAdminNotifications = function () {
+        fetch('{{ route('notifications.index') }}', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                updateBadge(data.unread_count);
+                renderList(data.notifications);
+            })
+            .catch(function () {});
+    };
+
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function () {
+            fetch('{{ route('notifications.readAll') }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+            }).then(window.loadAdminNotifications);
+        });
+    }
+
+    fetch('{{ route('notifications.index') }}', { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { updateBadge(data.unread_count); })
+        .catch(function () {});
+
+    setInterval(function () {
+        fetch('{{ route('notifications.index') }}', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) { updateBadge(data.unread_count); })
+            .catch(function () {});
+    }, 60000);
+})();
 </script>
 
 @yield('scripts')

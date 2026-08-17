@@ -6,9 +6,18 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Contact;
 use App\Models\Setting;
+use App\Services\NotificationService;
+use Illuminate\Support\Str;
 
 class ContactController extends Controller
 {
+    protected NotificationService $notifier;
+
+    public function __construct(NotificationService $notifier)
+    {
+        $this->notifier = $notifier;
+    }
+
     // 📄 Contact Page
     public function index()
     {
@@ -34,6 +43,13 @@ class ContactController extends Controller
             'phone'   => $request->phone,
             'message' => $request->message,
         ]);
+
+        $this->notifier->toAdmins(
+            'New contact message',
+            "{$request->name} sent a message: " . Str::limit($request->message, 80),
+            'info',
+            route('admin.contacts.index')
+        );
 
         return redirect()
             ->back()

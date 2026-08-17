@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Referral;
 use App\Models\Setting;
+use App\Services\NotificationService;
 use App\Services\OfferService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -18,12 +19,14 @@ class CheckoutController extends Controller
 {
     protected WalletService $wallet;
     protected OfferService $offers;
+    protected NotificationService $notifier;
 
-    public function __construct(WalletService $wallet, OfferService $offers)
+    public function __construct(WalletService $wallet, OfferService $offers, NotificationService $notifier)
     {
         $this->middleware('auth'); // must be logged in
         $this->wallet = $wallet;
         $this->offers = $offers;
+        $this->notifier = $notifier;
     }
 
     // -------------------------------------------------------------------------
@@ -132,6 +135,21 @@ class CheckoutController extends Controller
             // Clear cart after successful order
             session()->forget('cart');
 
+            $this->notifier->toUser(
+                $user,
+                'Order placed',
+                "Your order #{$order->id} has been placed successfully.",
+                'success',
+                route('orders.show', $order->id)
+            );
+
+            $this->notifier->toAdmins(
+                'New order received',
+                "{$user->name} placed a new order #{$order->id} worth ₹" . number_format($summary['total'], 2) . '.',
+                'info',
+                route('admin.orders.show', $order->id)
+            );
+
             return redirect()->route('checkout.success', $order->id)
                              ->with('success', 'Order placed successfully!');
 
@@ -193,6 +211,14 @@ class CheckoutController extends Controller
             'order_id'      => $order->id,
             'rewarded_at'   => now(),
         ]);
+
+        $this->notifier->toUser(
+            $referrer,
+            'Referral bonus credited',
+            "You earned ₹" . number_format($rewardAmount, 2) . " for referring {$user->name}.",
+            'success',
+            route('referrals.index')
+        );
     }
 
     // -------------------------------------------------------------------------

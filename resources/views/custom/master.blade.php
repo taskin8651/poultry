@@ -44,6 +44,10 @@
 
     @include('partials.flash-toast')
 
+    @auth
+        @include('partials.notifications-panel')
+    @endauth
+
 
     <!-- header area -->
     <header class="header">
@@ -101,6 +105,12 @@
 </a>
 
     @auth
+        {{-- 🔔 Notifications --}}
+        <button type="button" class="nav-icon notif-bell-btn border-0" data-bs-toggle="modal" data-bs-target="#notificationsModal" title="Notifications">
+            <i class="far fa-bell"></i>
+            <span class="badge notif-unread-badge d-none">0</span>
+        </button>
+
         {{-- 👤 My Account --}}
         <a href="{{ route('account.dashboard') }}"
            class="nav-icon {{ request()->is('account') ? 'active-icon' : '' }}">
@@ -210,6 +220,12 @@
     </a>
 
     @auth
+        {{-- 🔔 Notifications --}}
+        <button type="button" class="nav-icon notif-bell-btn border-0" data-bs-toggle="modal" data-bs-target="#notificationsModal" title="Notifications">
+            <i class="far fa-bell"></i>
+            <span class="badge notif-unread-badge d-none">0</span>
+        </button>
+
         {{-- 👤 My Account --}}
         <a href="{{ route('account.dashboard') }}"
            class="nav-icon {{ request()->is('account') ? 'active-icon' : '' }}"

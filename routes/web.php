@@ -96,6 +96,10 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 // User Dashboard
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+
     Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/my-orders/{id}', [OrderController::class, 'show'])->name('orders.show');
 

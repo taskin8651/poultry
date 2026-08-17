@@ -62,6 +62,16 @@ class User extends Authenticatable implements HasMedia
         return $this->roles()->where('id', 1)->exists();
     }
 
+    public function scopeAdmins($query)
+    {
+        return $query->whereHas('roles', fn ($q) => $q->where('id', 1));
+    }
+
+    public function scopeCustomers($query)
+    {
+        return $query->whereDoesntHave('roles', fn ($q) => $q->where('id', 1));
+    }
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);

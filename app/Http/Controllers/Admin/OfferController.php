@@ -4,10 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Offer;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class OfferController extends Controller
 {
+    protected NotificationService $notifier;
+
+    public function __construct(NotificationService $notifier)
+    {
+        $this->notifier = $notifier;
+    }
+
     public function index()
     {
         $offers = Offer::latest()->get();
@@ -28,6 +36,15 @@ class OfferController extends Controller
         if ($request->hasFile('image')) {
             $offer->addMediaFromRequest('image')
                   ->toMediaCollection('offer_image');
+        }
+
+        if ($offer->status) {
+            $this->notifier->toAllCustomers(
+                'New offer available',
+                "Check out our new offer: {$offer->title}",
+                'info',
+                route('offers')
+            );
         }
 
         return redirect()->route('admin.offers.index')
