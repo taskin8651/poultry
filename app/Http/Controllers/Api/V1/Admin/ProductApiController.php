@@ -22,59 +22,69 @@ class ProductApiController extends Controller
         ->latest()
         ->get();
 
+
         $data = $products->map(function ($product) {
 
             // Thumbnail
-            $thumbnail = $product->getFirstMedia('product_thumbnail');
+            $thumbnail = $product->getFirstMedia(
+                'product_thumbnail'
+            );
+
 
             return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
 
-                'category' => $product->category ? [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                ] : null,
+                'id' => $product->id,
+
+                'name' => $product->name,
+
+                'category' => $product->category
+                    ? $product->category->name
+                    : null,
 
                 'type' => $product->type,
+
                 'sale_type' => $product->sale_type,
 
                 'base_price' => $product->base_price,
+
                 'current_price' => $product->getPrice(1),
 
                 'stock' => $product->stock,
 
                 'description' => $product->description,
 
-                'status' => $product->status,
-
                 'thumbnail' => $thumbnail
                     ? $thumbnail->getUrl()
                     : null,
 
-                'tags' => $product->tags->map(function ($tag) {
-                    return [
-                        'id' => $tag->id,
-                        'name' => $tag->name,
-                    ];
-                })->values(),
+                'tags' => $product->tags
+                    ->pluck('name')
+                    ->values()
+                    ->toArray(),
 
-                'bulk_prices' => $product->bulkPrices->map(function ($bulk) {
-                    return [
-                        'id' => $bulk->id,
-                        'min_qty' => $bulk->min_qty,
-                        'price' => $bulk->price,
-                    ];
-                })->values(),
+                'bulk_prices' => $product->bulkPrices
+                    ->map(function ($bulk) {
+
+                        return [
+                            'min_qty' => $bulk->min_qty,
+                            'price' => $bulk->price,
+                        ];
+
+                    })
+                    ->values()
+                    ->toArray(),
             ];
-        })->values();
+        });
+
 
         return response()->json([
+
             'success' => true,
+
             'message' => 'Products fetched successfully.',
-            'total' => $data->count(),
+
             'products' => $data,
+
         ], 200);
     }
 
@@ -88,78 +98,97 @@ class ProductApiController extends Controller
             'category:id,name',
             'tags:id,name',
             'bulkPrices:id,product_id,min_qty,price',
-        ])->find($id);
+        ])
+        ->where('status', 1)
+        ->find($id);
+
 
         if (!$product) {
+
             return response()->json([
+
                 'success' => false,
+
                 'message' => 'Product not found.',
+
             ], 404);
         }
 
-        $thumbnail = $product->getFirstMedia('product_thumbnail');
 
-        $gallery = $product->getMedia('product_gallery')
-            ->map(function ($media) {
-                return [
-                    'id' => $media->id,
-                    'url' => $media->getUrl(),
-                    'name' => $media->name,
-                ];
-            })
-            ->values();
+        // Thumbnail
+        $thumbnail = $product->getFirstMedia(
+            'product_thumbnail'
+        );
+
+
+        // Gallery
+        $gallery = $product->getMedia(
+            'product_gallery'
+        )
+        ->map(function ($media) {
+
+            return $media->getUrl();
+
+        })
+        ->values()
+        ->toArray();
+
+
+        $data = [
+
+            'id' => $product->id,
+
+            'name' => $product->name,
+
+            'category' => $product->category
+                ? $product->category->name
+                : null,
+
+            'type' => $product->type,
+
+            'sale_type' => $product->sale_type,
+
+            'base_price' => $product->base_price,
+
+            'current_price' => $product->getPrice(1),
+
+            'stock' => $product->stock,
+
+            'description' => $product->description,
+
+            'thumbnail' => $thumbnail
+                ? $thumbnail->getUrl()
+                : null,
+
+            'gallery' => $gallery,
+
+            'tags' => $product->tags
+                ->pluck('name')
+                ->values()
+                ->toArray(),
+
+            'bulk_prices' => $product->bulkPrices
+                ->map(function ($bulk) {
+
+                    return [
+                        'min_qty' => $bulk->min_qty,
+                        'price' => $bulk->price,
+                    ];
+
+                })
+                ->values()
+                ->toArray(),
+        ];
+
 
         return response()->json([
+
             'success' => true,
+
             'message' => 'Product details fetched successfully.',
 
-            'product' => [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
+            'product' => $data,
 
-                'category' => $product->category ? [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                ] : null,
-
-                'type' => $product->type,
-                'sale_type' => $product->sale_type,
-
-                'base_price' => $product->base_price,
-                'stock' => $product->stock,
-
-                'description' => $product->description,
-                'status' => $product->status,
-
-                'thumbnail' => $thumbnail
-                    ? $thumbnail->getUrl()
-                    : null,
-
-                'gallery' => $gallery,
-
-                'tags' => $product->tags->map(function ($tag) {
-                    return [
-                        'id' => $tag->id,
-                        'name' => $tag->name,
-                    ];
-                })->values(),
-
-                'bulk_prices' => $product->bulkPrices
-                    ->map(function ($bulk) {
-                        return [
-                            'id' => $bulk->id,
-                            'min_qty' => $bulk->min_qty,
-                            'price' => $bulk->price,
-                        ];
-                    })
-                    ->values(),
-
-                'current_price' => $product->getPrice(1),
-
-                'created_at' => $product->created_at,
-                'updated_at' => $product->updated_at,
-            ],
         ], 200);
     }
 }
