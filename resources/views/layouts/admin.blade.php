@@ -143,7 +143,7 @@
                     </div>
 
                     <div class="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                        <span id="admin-notif-count-label" class="text-xs text-slate-400"></span>
+                        <a href="{{ route('notifications.page') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">View all</a>
                         <button id="admin-notif-mark-all" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Mark all as read</button>
                     </div>
                 </div>

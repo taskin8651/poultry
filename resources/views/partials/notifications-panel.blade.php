@@ -12,7 +12,10 @@
             </div>
             <div class="modal-footer justify-content-between">
                 <small class="text-muted" id="notif-count-label"></small>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="notif-mark-all">Mark all as read</button>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('notifications.page') }}" class="btn btn-sm btn-outline-secondary">View all</a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="notif-mark-all">Mark all as read</button>
+                </div>
             </div>
         </div>
     </div>

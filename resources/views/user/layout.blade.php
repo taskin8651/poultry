@@ -54,6 +54,9 @@
                         <a href="{{ route('account.dashboard') }}" class="user-nav-link {{ request()->routeIs('account.dashboard') ? 'active' : '' }}">
                             <span class="user-nav-icon"><i class="far fa-th-large"></i></span> Dashboard
                         </a>
+                        <a href="{{ route('notifications.page') }}" class="user-nav-link {{ request()->routeIs('notifications.page') ? 'active' : '' }}">
+                            <span class="user-nav-icon"><i class="far fa-bell"></i></span> Notifications
+                        </a>
                         <a href="{{ route('orders.index') }}" class="user-nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}">
                             <span class="user-nav-icon"><i class="far fa-box"></i></span> My Orders
                         </a>

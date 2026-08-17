@@ -39,13 +39,30 @@ class NotificationController extends Controller
         $notification = Auth::user()->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsRead();
 
-        return response()->json(['success' => true]);
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect($request->input('redirect') ?: url()->previous());
     }
 
-    public function markAllRead()
+    public function markAllRead(Request $request)
     {
         Auth::user()->unreadNotifications()->update(['read_at' => now()]);
 
-        return response()->json(['success' => true]);
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back();
+    }
+
+    public function page()
+    {
+        $user = Auth::user();
+
+        $notifications = $user->notifications()->latest()->paginate(15);
+
+        return view($user->is_admin ? 'admin.notifications.index' : 'user.notifications', compact('notifications'));
     }
 }
