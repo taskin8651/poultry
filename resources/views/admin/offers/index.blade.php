@@ -118,32 +118,6 @@
         </div>
 
 
-        {{-- =====================================================
-             SUCCESS MESSAGE
-        ====================================================== --}}
-        @if(session('success'))
-
-            <div
-                class="mb-6 flex items-center gap-3 rounded-2xl
-                       border border-emerald-100 bg-emerald-50
-                       px-5 py-4 text-sm font-semibold text-emerald-700"
-            >
-
-                <div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center
-                           rounded-full bg-emerald-100"
-                >
-                    <i class="bi bi-check-lg"></i>
-                </div>
-
-                <span>
-                    {{ session('success') }}
-                </span>
-
-            </div>
-
-        @endif
-
 
         {{-- =====================================================
              OFFER CARDS

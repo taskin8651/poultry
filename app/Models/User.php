@@ -13,12 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    use HasApiTokens, SoftDeletes, Notifiable, HasFactory;
+    use HasApiTokens, SoftDeletes, Notifiable, HasFactory, InteractsWithMedia;
 
     public $table = 'users';
 
@@ -135,5 +137,15 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('profile_image')->singleFile();
+    }
+
+    public function getProfileImageUrlAttribute()
+    {
+        return $this->getFirstMediaUrl('profile_image') ?: null;
     }
 }

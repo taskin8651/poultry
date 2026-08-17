@@ -174,24 +174,7 @@
         {{-- CONTENT --}}
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
 
-            {{-- SUCCESS --}}
-            @if(session('message'))
-                <div class="alert-premium-success mb-6">
-                    <i class="fas fa-check-circle"></i>
-                    {{ session('message') }}
-                </div>
-            @endif
-
-            {{-- ERRORS --}}
-            @if($errors->count() > 0)
-                <div class="alert-premium-error mb-6">
-                    <ul class="list-disc ml-5">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            @include('partials.admin-flash-toast')
 
             @yield('content')
 

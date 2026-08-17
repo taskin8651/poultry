@@ -644,6 +644,7 @@ function changeImage(el) {
                 // ✅ Success
                 btn.innerHTML = '<span class="far fa-check"></span> Added!';
                 btn.classList.add('btn-success');
+                showToast(data.message || 'Added to cart', 'success');
  
                 // Update cart badge if you have one
                 const badge = document.getElementById('cart-count-badge');
@@ -661,7 +662,7 @@ function changeImage(el) {
             } else {
                 // ❌ Server returned error (validation etc.)
                 console.error('Server error:', data);
-                alert(data.message ?? 'Could not add to cart. Check console for details.');
+                showToast(data.message ?? 'Could not add to cart.', 'error');
                 btn.disabled  = false;
                 btn.innerHTML = '<span class="far fa-shopping-cart"></span> Add to Cart';
             }
@@ -669,7 +670,7 @@ function changeImage(el) {
         .catch(function (err) {
             // ❌ Network / parse error
             console.error('Fetch error:', err);
-            alert('Network error. Open browser console (F12) and check the error.');
+            showToast('Network error. Please try again.', 'error');
             btn.disabled  = false;
             btn.innerHTML = '<span class="far fa-shopping-cart"></span> Add to Cart';
         });

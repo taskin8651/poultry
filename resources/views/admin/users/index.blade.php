@@ -176,7 +176,7 @@ $(function () {
             });
 
             if (ids.length === 0) {
-                alert('{{ trans('global.datatables.zero_selected') }}');
+                showToast('{{ trans('global.datatables.zero_selected') }}', 'warning');
                 return;
             }
 

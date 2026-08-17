@@ -13,13 +13,6 @@
     </div>
 </div>
 
-{{-- Alerts --}}
-@if(session('error'))
-    <div class="container mt-3">
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    </div>
-@endif
-
 {{-- Checkout --}}
 <div class="shop-checkout py-120">
     <div class="container">

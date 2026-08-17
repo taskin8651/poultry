@@ -180,7 +180,7 @@ function qtyChange(id) {
     .then(res => res.json())
     .then(data => {
         if (!data.success) {
-            alert(data.message || 'Could not update quantity.');
+            showToast(data.message || 'Could not update quantity.', 'error');
             return;
         }
         updateSummary(data.summary);

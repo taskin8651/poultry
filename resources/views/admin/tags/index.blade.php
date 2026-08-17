@@ -45,18 +45,6 @@
     </div>
 
 
-    {{-- =====================================================
-         SUCCESS MESSAGE
-    ====================================================== --}}
-    @if(session('success'))
-
-        <div class="alert-premium-success mb-6">
-            <i class="fas fa-check-circle"></i>
-            {{ session('success') }}
-        </div>
-
-    @endif
-
 
     {{-- =====================================================
          TAGS TABLE

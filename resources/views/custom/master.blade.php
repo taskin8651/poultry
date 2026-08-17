@@ -42,6 +42,8 @@
     </div>
     <!-- preloader end -->
 
+    @include('partials.flash-toast')
+
 
     <!-- header area -->
     <header class="header">
