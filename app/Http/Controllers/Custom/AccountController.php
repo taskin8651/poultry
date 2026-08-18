@@ -55,13 +55,19 @@ class AccountController extends Controller
         $user = Auth::user();
 
         $data = $request->validate([
-            'name'    => ['required', 'string', 'max:255'],
-            'email'   => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone'   => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:500'],
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone'         => ['nullable', 'string', 'max:20'],
+            'address'       => ['nullable', 'string', 'max:500'],
+            'profile_image' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $user->update($data);
+        $user->update(collect($data)->except('profile_image')->toArray());
+
+        if ($request->hasFile('profile_image')) {
+            $user->clearMediaCollection('profile_image');
+            $user->addMediaFromRequest('profile_image')->toMediaCollection('profile_image');
+        }
 
         return back()->with('success', 'Profile updated successfully.');
     }

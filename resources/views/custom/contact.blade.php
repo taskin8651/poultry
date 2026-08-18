@@ -32,23 +32,6 @@
                             <p>Feel free to contact us anytime. We will get back to you as soon as possible.</p>
                         </div>
 
-                        {{-- SUCCESS MESSAGE --}}
-                        @if(session('success'))
-                            <div class="alert alert-success">
-                                {{ session('success') }}
-                            </div>
-                        @endif
-
-                        {{-- ERROR MESSAGE --}}
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
 
                         {{-- FORM --}}
                         <form method="POST" action="{{ route('contact.store') }}">

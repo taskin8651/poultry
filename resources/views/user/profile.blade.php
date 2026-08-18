@@ -9,11 +9,30 @@
     <div class="user-card-header">Profile Information</div>
     <div class="user-card-body">
 
-        <form method="POST" action="{{ route('account.profile.update') }}">
+        <form method="POST" action="{{ route('account.profile.update') }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="row g-3">
+                <div class="col-12">
+                    <div class="user-field">
+                        <label>Profile Image</label>
+                        <div class="d-flex align-items-center gap-3">
+                            @if($user->profile_image_url)
+                                <img src="{{ $user->profile_image_url }}" alt="Profile Image" id="profile-image-preview"
+                                     style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:1px solid #e5e5e5;">
+                            @else
+                                <div class="user-avatar" id="profile-image-preview-avatar" style="width:72px;height:72px;font-size:1.5rem;">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                                <img src="" alt="Profile Image" id="profile-image-preview" class="d-none"
+                                     style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:1px solid #e5e5e5;">
+                            @endif
+                            <input type="file" name="profile_image" accept="image/*" class="user-input"
+                                   onchange="var p=document.getElementById('profile-image-preview'); var a=document.getElementById('profile-image-preview-avatar'); p.src = URL.createObjectURL(this.files[0]); p.classList.remove('d-none'); if(a){a.classList.add('d-none');}">
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-6">
                     <div class="user-field">
                         <label>Full Name</label>

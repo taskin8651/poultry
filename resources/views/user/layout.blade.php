@@ -12,7 +12,12 @@
         {{-- TOP BAR --}}
         <div class="user-topbar">
             <div class="user-topbar-left">
-                <div class="user-topbar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                @if(auth()->user()->profile_image_url)
+                    <img src="{{ auth()->user()->profile_image_url }}" alt="{{ auth()->user()->name }}"
+                         class="user-topbar-avatar" style="object-fit:cover;">
+                @else
+                    <div class="user-topbar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                @endif
                 <div>
                     <h1 class="user-topbar-title">@yield('account-title', 'My Account')</h1>
                     <p class="user-topbar-sub">@yield('account-subtitle', 'Manage your orders, profile and account preferences.')</p>
@@ -31,7 +36,12 @@
 
                     <div class="user-sidebar-head">
                         <div class="user-avatar-ring">
-                            <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                            @if(auth()->user()->profile_image_url)
+                                <img src="{{ auth()->user()->profile_image_url }}" alt="{{ auth()->user()->name }}"
+                                     class="user-avatar" style="object-fit:cover;">
+                            @else
+                                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                            @endif
                         </div>
                         <h6 class="user-sidebar-name">{{ auth()->user()->name }}</h6>
                         <span class="user-sidebar-email">{{ auth()->user()->email }}</span>
@@ -43,6 +53,9 @@
                     <nav class="user-nav">
                         <a href="{{ route('account.dashboard') }}" class="user-nav-link {{ request()->routeIs('account.dashboard') ? 'active' : '' }}">
                             <span class="user-nav-icon"><i class="far fa-th-large"></i></span> Dashboard
+                        </a>
+                        <a href="{{ route('notifications.page') }}" class="user-nav-link {{ request()->routeIs('notifications.page') ? 'active' : '' }}">
+                            <span class="user-nav-icon"><i class="far fa-bell"></i></span> Notifications
                         </a>
                         <a href="{{ route('orders.index') }}" class="user-nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}">
                             <span class="user-nav-icon"><i class="far fa-box"></i></span> My Orders
@@ -74,28 +87,6 @@
 
             {{-- CONTENT --}}
             <div class="col-lg-9">
-
-                @if(session('success'))
-                    <div class="user-alert user-alert-success">
-                        <i class="far fa-check-circle"></i> {{ session('success') }}
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="user-alert user-alert-danger">
-                        <i class="far fa-exclamation-circle"></i> {{ session('error') }}
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="user-alert user-alert-danger">
-                        <ul class="mb-0 ps-3">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 @yield('account-content')
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\User;
@@ -13,6 +14,12 @@ use App\Models\OrderItem;
 
 class OrderController extends Controller
 {
+    protected NotificationService $notifier;
+
+    public function __construct(NotificationService $notifier)
+    {
+        $this->notifier = $notifier;
+    }
 
 public function index()
 {
@@ -33,6 +40,14 @@ public function update(Request $request, $id)
     $order->update([
         'status' => $request->status
     ]);
+
+    $this->notifier->toUser(
+        $order->user,
+        'Order status updated',
+        "Your order #{$order->id} is now {$order->status}.",
+        'info',
+        route('orders.show', $order->id)
+    );
 
     return back()->with('success','Order status updated');
 }

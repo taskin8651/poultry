@@ -40,18 +40,6 @@
     </div>
 
 
-    {{-- =====================================================
-         SUCCESS MESSAGE
-    ====================================================== --}}
-    @if(session('success'))
-
-        <div class="alert-premium-success mb-6">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>{{ session('success') }}</span>
-        </div>
-
-    @endif
-
 
     {{-- =====================================================
          CONTACTS TABLE

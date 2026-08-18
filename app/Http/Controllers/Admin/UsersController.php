@@ -37,7 +37,7 @@ class UsersController extends Controller
         $user = User::create($request->all());
         $user->roles()->sync($request->input('roles', []));
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 
     public function edit(User $user)
@@ -56,7 +56,7 @@ class UsersController extends Controller
         $user->update($request->all());
         $user->roles()->sync($request->input('roles', []));
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     public function show(User $user)
@@ -74,7 +74,7 @@ class UsersController extends Controller
 
         $user->delete();
 
-        return back();
+        return back()->with('success', 'User deleted successfully.');
     }
 
     public function massDestroy(MassDestroyUserRequest $request)

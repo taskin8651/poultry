@@ -44,6 +44,16 @@
             {{ trans('global.dashboard') }}
         </a>
 
+        {{-- NOTIFICATIONS --}}
+        <a href="{{ route('notifications.page') }}"
+           class="group flex items-center gap-3 px-3 py-2 rounded-xl transition
+           {{ request()->routeIs('notifications.page')
+                ? 'nav-active bg-white/10 text-white shadow-inner shadow-black/20'
+                : 'text-slate-300 hover:bg-white/5 hover:text-white hover:pl-4' }}">
+            <i class="fas fa-bell text-slate-400 group-hover:text-white transition"></i>
+            Notifications
+        </a>
+
         {{-- USER MANAGEMENT --}}
         @can('user_management_access')
             <div x-data="{ open:

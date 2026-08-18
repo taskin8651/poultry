@@ -21,13 +21,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert-premium-success mb-6">
-            <i class="fas fa-check-circle"></i>
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="card-premium overflow-hidden">
         <form method="POST" enctype="multipart/form-data"
               action="{{ route('admin.settings.update') }}">

@@ -79,22 +79,6 @@
 
 
     {{-- =====================================================
-         SUCCESS MESSAGE
-    ====================================================== --}}
-    @if(session('success'))
-
-        <div class="alert-premium-success mb-6">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                <i class="bi bi-check-lg"></i>
-            </div>
-
-            <span>{{ session('success') }}</span>
-        </div>
-
-    @endif
-
-
-    {{-- =====================================================
          SERVICE CARDS
     ====================================================== --}}
     @if($services->count())
