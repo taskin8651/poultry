@@ -18,7 +18,7 @@ Route::group(['prefix' => 'v1','as' => 'api.','namespace' => 'Api\V1\Admin'], fu
     // 🛒 Single Product
     Route::get('products/{id}','ProductApiController@show')->name('products.show');
 
-    // Orders
+    // Orderss
     Route::post('orders', 'OrderApiController@store')->name('orders.store');
 
     Route::get('orders/{user_id}', 'OrderApiController@index')->name('orders.index');
