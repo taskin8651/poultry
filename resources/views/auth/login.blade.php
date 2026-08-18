@@ -11,7 +11,7 @@
 
                 {{-- Header --}}
                 <div class="login-header text-center mb-4">
-                    <img src="{{ asset('assets/img/logo/logo.png') }}" alt="logo" width="120">
+                    
                     <p>Login with your account</p>
                 </div>
 
