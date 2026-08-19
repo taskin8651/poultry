@@ -59,8 +59,13 @@ class CheckoutController extends Controller
         }
 
         $request->validate([
-            'note'       => 'nullable|string|max:1000',
-            'use_wallet' => 'nullable|boolean',
+            'note'                 => 'nullable|string|max:1000',
+            'use_wallet'           => 'nullable|boolean',
+            'shipping_first_name'  => 'required|string|max:255',
+            'shipping_last_name'   => 'nullable|string|max:255',
+            'shipping_phone'       => 'required|string|max:20',
+            'shipping_address1'    => 'required|string|max:255',
+            'shipping_address2'    => 'nullable|string|max:255',
         ]);
 
         $user    = Auth::user();
@@ -92,13 +97,19 @@ class CheckoutController extends Controller
 
             // Create order
             $order = Order::create([
-                'user_id'        => $user->id,
-                'total_qty'      => collect($cart)->sum('quantity'),
-                'total_amount'   => $summary['total'],
-                'wallet_used'    => $walletToApply,
-                'payment_method' => 'cod',
-                'status'         => 'pending',
-                'note'           => $request->note,
+                'user_id'              => $user->id,
+                'total_qty'            => collect($cart)->sum('quantity'),
+                'total_amount'         => $summary['total'],
+                'wallet_used'          => $walletToApply,
+                'payment_method'       => 'cod',
+                'payment_status'       => 'pending',
+                'status'               => 'pending',
+                'note'                 => $request->note,
+                'shipping_first_name'  => $request->shipping_first_name,
+                'shipping_last_name'   => $request->shipping_last_name,
+                'shipping_phone'       => $request->shipping_phone,
+                'shipping_address1'    => $request->shipping_address1,
+                'shipping_address2'    => $request->shipping_address2,
             ]);
 
             // Create order items + decrement stock

@@ -44,9 +44,31 @@
                 <h6 style="color:var(--up-muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;">Order Info</h6>
                 <strong>Date:</strong> {{ $order->created_at->format('d M Y') }}<br>
                 <strong>Status:</strong> {{ ucfirst($order->status) }}<br>
-                <strong>Payment:</strong> Cash on Delivery
+                <strong>Payment:</strong> Cash on Delivery<br>
+                <strong>Payment Status:</strong> {{ ucfirst($order->payment_status ?? 'pending') }}
             </div>
         </div>
+
+        @if($order->shipping_address1)
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6 style="color:var(--up-muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;">Shipping Address</h6>
+                <strong>{{ trim(($order->shipping_first_name ?? '') . ' ' . ($order->shipping_last_name ?? '')) }}</strong><br>
+                @if($order->shipping_phone)<small>{{ $order->shipping_phone }}</small><br>@endif
+                <small>{{ $order->shipping_address1 }}@if($order->shipping_address2), {{ $order->shipping_address2 }}@endif</small>
+            </div>
+        </div>
+        @endif
+
+        @if($order->tracking_url)
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <a href="{{ $order->tracking_url }}" target="_blank" rel="noopener" class="user-btn">
+                    <i class="far fa-truck"></i> Track Order
+                </a>
+            </div>
+        </div>
+        @endif
 
         {{-- Items Table --}}
         <div class="table-responsive">

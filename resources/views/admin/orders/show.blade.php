@@ -9,6 +9,7 @@
         'cancelled' => 'badge-danger',
         default => 'badge-neutral',
     };
+    $paymentStatusClass = $order->payment_status === 'confirmed' ? 'badge-success' : 'badge-neutral';
 @endphp
 
 <div class="mx-auto w-full max-w-5xl">
@@ -114,6 +115,49 @@
                 </p>
             </div>
 
+            <div class="rounded-2xl bg-slate-50 p-4">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Payment Status
+                </p>
+                <p class="mt-1">
+                    <span class="badge-premium {{ $paymentStatusClass }}">
+                        {{ ucfirst($order->payment_status ?? 'pending') }}
+                    </span>
+                </p>
+            </div>
+
+            @if($order->shipping_address1)
+
+                <div class="rounded-2xl bg-slate-50 p-4 sm:col-span-2 lg:col-span-4">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Shipping Address
+                    </p>
+                    <p class="mt-1 text-sm font-semibold text-slate-700">
+                        {{ trim(($order->shipping_first_name ?? '') . ' ' . ($order->shipping_last_name ?? '')) }}
+                        @if($order->shipping_phone) &middot; {{ $order->shipping_phone }} @endif
+                        <br>
+                        {{ $order->shipping_address1 }}
+                        @if($order->shipping_address2), {{ $order->shipping_address2 }}@endif
+                    </p>
+                </div>
+
+            @endif
+
+            @if($order->tracking_url)
+
+                <div class="rounded-2xl bg-slate-50 p-4 sm:col-span-2 lg:col-span-4">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Track URL
+                    </p>
+                    <p class="mt-1 text-sm font-semibold text-slate-700">
+                        <a href="{{ $order->tracking_url }}" target="_blank" rel="noopener" class="text-indigo-600 underline">
+                            {{ $order->tracking_url }}
+                        </a>
+                    </p>
+                </div>
+
+            @endif
+
             @if($order->note)
 
                 <div class="rounded-2xl bg-slate-50 p-4 sm:col-span-2 lg:col-span-4">
@@ -143,7 +187,7 @@
 
         <form method="POST"
               action="{{ route('admin.orders.update', $order->id) }}"
-              class="flex flex-col gap-4 sm:flex-row sm:items-end">
+              class="flex flex-col gap-4 sm:flex-row sm:items-end sm:flex-wrap">
             @csrf
             @method('PUT')
 
@@ -159,6 +203,30 @@
                     <option value="delivered" {{ $order->status=='delivered'?'selected':'' }}>Delivered</option>
                     <option value="cancelled" {{ $order->status=='cancelled'?'selected':'' }}>Cancelled</option>
                 </select>
+
+            </div>
+
+            <div class="w-full sm:max-w-xs">
+
+                <label for="payment_status" class="label-premium">
+                    Payment Status
+                </label>
+
+                <select id="payment_status" name="payment_status" class="input-premium">
+                    <option value="pending" {{ ($order->payment_status ?? 'pending')=='pending'?'selected':'' }}>Pending</option>
+                    <option value="confirmed" {{ ($order->payment_status ?? 'pending')=='confirmed'?'selected':'' }}>Confirmed</option>
+                </select>
+
+            </div>
+
+            <div class="w-full sm:max-w-sm">
+
+                <label for="tracking_url" class="label-premium">
+                    Track URL <span class="text-slate-400 font-normal">(add after confirming the order)</span>
+                </label>
+
+                <input type="url" id="tracking_url" name="tracking_url" class="input-premium"
+                       placeholder="https://..." value="{{ $order->tracking_url }}">
 
             </div>
 

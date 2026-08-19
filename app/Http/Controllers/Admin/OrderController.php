@@ -37,8 +37,16 @@ public function update(Request $request, $id)
 {
     $order = Order::findOrFail($id);
 
+    $request->validate([
+        'status'         => 'required|in:pending,confirmed,delivered,cancelled',
+        'payment_status' => 'nullable|in:pending,confirmed',
+        'tracking_url'   => 'nullable|url|max:1000',
+    ]);
+
     $order->update([
-        'status' => $request->status
+        'status'         => $request->status,
+        'payment_status' => $request->payment_status ?? $order->payment_status,
+        'tracking_url'   => $request->tracking_url,
     ]);
 
     $this->notifier->toUser(

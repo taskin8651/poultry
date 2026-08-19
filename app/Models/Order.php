@@ -15,8 +15,15 @@ class Order extends Model
         'total_amount',
         'wallet_used',
         'payment_method',
+        'payment_status',
         'status',
-        'note'
+        'note',
+        'shipping_first_name',
+        'shipping_last_name',
+        'shipping_phone',
+        'shipping_address1',
+        'shipping_address2',
+        'tracking_url',
     ];
 
     // 🔥 Relation: Order → Items
