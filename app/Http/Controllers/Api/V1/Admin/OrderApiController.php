@@ -14,20 +14,24 @@ class OrderApiController extends Controller
      * Create Order
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
+        {
+            $request->validate([
+        'user_id' => 'required|exists:users,id',
 
-            'items' => 'required|array|min:1',
+        'items' => 'required|array|min:1',
+        'items.*.product_id' => 'required|exists:products,id',
+        'items.*.qty' => 'required|integer|min:1',
 
-            'items.*.product_id' => 'required|exists:products,id',
+        'payment_method' => 'required|string|in:cod,online',
 
-            'items.*.qty' => 'required|integer|min:1',
+        'shipping_first_name' => 'required|string|max:100',
+        'shipping_last_name' => 'nullable|string|max:100',
+        'shipping_phone' => 'required|string|max:20',
+        'shipping_address1' => 'required|string|max:255',
+        'shipping_address2' => 'nullable|string|max:255',
 
-            'payment_method' => 'required|string',
-
-            'note' => 'nullable|string|max:500',
-        ]);
+        'note' => 'nullable|string|max:500',
+    ]);
 
 
         try {
@@ -48,15 +52,18 @@ class OrderApiController extends Controller
                     'user_id' => $request->user_id,
 
                     'total_qty' => 0,
-
                     'total_amount' => 0,
-
                     'wallet_used' => 0,
 
-                    'payment_method' =>
-                        $request->payment_method,
-
+                    'payment_method' => $request->payment_method,
+                    'payment_status' => 'pending',
                     'status' => 'pending',
+
+                    'shipping_first_name' => $request->shipping_first_name,
+                    'shipping_last_name' => $request->shipping_last_name,
+                    'shipping_phone' => $request->shipping_phone,
+                    'shipping_address1' => $request->shipping_address1,
+                    'shipping_address2' => $request->shipping_address2,
 
                     'note' => $request->note,
                 ]);
@@ -224,6 +231,14 @@ class OrderApiController extends Controller
 
                     'note' =>
                         $order->note,
+
+                    'shipping' => [
+                        'first_name' => $order->shipping_first_name,
+                        'last_name' => $order->shipping_last_name,
+                        'phone' => $order->shipping_phone,
+                        'address1' => $order->shipping_address1,
+                        'address2' => $order->shipping_address2,
+                    ],
 
                     'items' =>
                         $order->items->map(
