@@ -22,7 +22,7 @@
         <div class="d-flex justify-content-between mb-4 flex-wrap gap-2">
             <div>
                 <h3 class="mb-0 fw-bold">Invoice</h3>
-                <small style="color:var(--up-muted);">#{{ $order->id }} &middot; {{ $order->created_at->format('d M Y, h:i A') }}</small>
+                <small style="color:var(--up-muted);">#{{ $order->id }} &middot; {{ $order->created_at?->format('d M Y, h:i A') ?? '-' }}</small>
             </div>
 
             <div class="text-end">
@@ -42,7 +42,7 @@
 
             <div class="col-md-6 text-md-end">
                 <h6 style="color:var(--up-muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;">Order Info</h6>
-                <strong>Date:</strong> {{ $order->created_at->format('d M Y') }}<br>
+                <strong>Date:</strong> {{ $order->created_at?->format('d M Y') ?? '-' }}<br>
                 <strong>Status:</strong> {{ ucfirst($order->status) }}<br>
                 <strong>Payment:</strong> Cash on Delivery<br>
                 <strong>Payment Status:</strong> {{ ucfirst($order->payment_status ?? 'pending') }}

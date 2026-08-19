@@ -22,7 +22,7 @@
             <div>
                 <strong>Order #{{ $order->id }}</strong>
                 <div class="small" style="color:var(--up-muted);font-weight:500;">
-                    {{ $order->created_at->format('d M Y, h:i A') }}
+                    {{ $order->created_at?->format('d M Y, h:i A') ?? '-' }}
                 </div>
             </div>
             <span class="user-badge {{ $statusBadge[$order->status] ?? 'user-badge-pending' }}">

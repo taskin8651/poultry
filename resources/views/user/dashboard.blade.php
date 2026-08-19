@@ -70,7 +70,7 @@
                             <a href="{{ route('orders.show', $order->id) }}" class="fw-bold text-decoration-none" style="color:var(--up-text);">
                                 Order #{{ $order->id }}
                             </a>
-                            <div class="small" style="color:var(--up-muted);">{{ $order->created_at->format('d M Y, h:i A') }} &middot; {{ $order->total_qty }} items</div>
+                            <div class="small" style="color:var(--up-muted);">{{ $order->created_at?->format('d M Y, h:i A') ?? '-' }} &middot; {{ $order->total_qty }} items</div>
                         </div>
                         <div class="text-end">
                             <div class="fw-bold">₹ {{ number_format($order->total_amount, 2) }}</div>
