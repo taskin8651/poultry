@@ -46,7 +46,7 @@
                         <h6 class="user-sidebar-name">{{ auth()->user()->name }}</h6>
                         <span class="user-sidebar-email">{{ auth()->user()->email }}</span>
                         <span class="user-member-chip">
-                            <i class="far fa-star"></i> Member since {{ auth()->user()->created_at->format('M Y') }}
+                            <i class="far fa-star"></i> Member since {{ auth()->user()->created_at?->format('M Y') ?? '-' }}
                         </span>
                     </div>
 
